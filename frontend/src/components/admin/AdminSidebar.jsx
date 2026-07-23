@@ -1,0 +1,123 @@
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import {
+  FaHome,
+  FaChartLine,
+  FaTags,
+  FaBox,
+  FaVideo,
+  FaShoppingBag,
+  FaHeart,
+  FaComment,
+  FaThumbsUp,
+  FaCog,
+  FaSignOutAlt,
+  FaBars,
+  FaTimes
+} from 'react-icons/fa';
+import { useAdmin } from '../../context/AdminContext';
+
+const AdminSidebar = ({ isOpen, setIsOpen }) => {
+  const { logout } = useAdmin();
+  const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const menuItems = [
+    { path: '/admin', icon: FaHome, label: 'Home' },
+    { path: '/admin/analytics', icon: FaChartLine, label: 'Analytics' },
+    { path: '/admin/categories', icon: FaTags, label: 'Categories' },
+    { path: '/admin/products', icon: FaBox, label: 'Products' },
+    { path: '/admin/videos', icon: FaVideo, label: 'Videos' },
+    { path: '/admin/orders', icon: FaShoppingBag, label: 'Orders' },
+    { path: '/admin/wishlist', icon: FaHeart, label: 'Wishlist' },
+    { path: '/admin/comments', icon: FaComment, label: 'Comments' },
+    { path: '/admin/likes', icon: FaThumbsUp, label: 'Likes' },
+    { path: '/admin/settings', icon: FaCog, label: 'Settings' },
+  ];
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+    setIsLoggingOut(false);
+    navigate('/');
+  };
+
+  return (
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside 
+        className={`fixed top-0 left-0 h-full bg-white shadow-soft z-50 transition-all duration-300 ${
+          isOpen ? 'w-64' : 'w-20'
+        } lg:block ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        {/* Logo & Toggle */}
+        <div className="flex items-center justify-between h-20 px-4 border-b border-primary-babyPink/20">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🧶</span>
+            {isOpen && (
+              <span className="font-display text-xl font-bold text-gradient">
+                CozyLoops
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2 rounded-lg hover:bg-primary-babyPink/20 transition-colors"
+          >
+            {isOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100%-8rem)]">
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                  isActive
+                    ? 'bg-gradient-pink text-white shadow-soft'
+                    : 'hover:bg-primary-babyPink/20 text-secondary-dark/70 hover:text-secondary-dark'
+                } ${!isOpen && 'justify-center'}`
+              }
+              title={!isOpen ? item.label : ''}
+            >
+              <item.icon className={`text-xl ${!isOpen && 'text-2xl'}`} />
+              {isOpen && <span className="font-medium">{item.label}</span>}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Logout Button */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-babyPink/20 bg-white">
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-300 hover:bg-red-50 text-secondary-dark/70 hover:text-red-500 ${
+              !isOpen && 'justify-center'
+            }`}
+          >
+            <FaSignOutAlt className="text-xl" />
+            {isOpen && (
+              <span className="font-medium">
+                {isLoggingOut ? 'Logging out...' : 'Logout'}
+              </span>
+            )}
+          </button>
+        </div>
+      </aside>
+    </>
+  );
+};
+
+export default AdminSidebar;

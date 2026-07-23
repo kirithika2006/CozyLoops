@@ -1,0 +1,39 @@
+/* Custom theme variables for CozyLoops */
+:root {
+  --color-primary-white: #FFFFFF;
+  --color-primary-baby-pink: #FFB6C1;
+  --color-primary-rose-pink: #FF69B4;
+  --color-primary-soft-peach: #FFDAB9;
+  --color-primary-lavender: #E6E6FA;
+  --color-primary-dark-pink: #DB7093;
+  --color-primary-light-pink: #FFE4E1;
+  
+  --color-secondary-gray: #F5F5F5;
+  --color-secondary-dark: #333333;
+  --color-secondary-light: #FAFAFA;
+  
+  --shadow-soft: 0 10px 30px -5px rgba(255, 182, 193, 0.3);
+  --shadow-glass: 0 8px 32px 0 rgba(255, 182, 193, 0.15);
+  --shadow-premium: 0 20px 60px -10px rgba(255, 105, 180, 0.2);
+  
+  --radius-default: 1rem;
+  --radius-full: 9999px;
+  
+  --transition-default: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+  --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Dark mode variables */
+.dark {
+  --color-secondary-dark: #FFFFFF;
+  --color-secondary-light: #1A1A1A;
+  --color-secondary-gray: #2A2A2A;
+}
+
+/* Responsive breakpoints */
+@custom-media --screen-sm (min-width: 640px);
+@custom-media --screen-md (min-width: 768px);
+@custom-media --screen-lg (min-width: 1024px);
+@custom-media --screen-xl (min-width: 1280px);
+@custom-media --screen-2xl (min-width: 1536px);
