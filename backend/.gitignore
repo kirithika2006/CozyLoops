@@ -1,0 +1,14 @@
+node_modules/
+.env
+.DS_Store
+dist/
+build/
+*.log
+coverage/
+.nyc_output/
+.vscode/
+*.swp
+*.swo
+
+# Cloudinary uploads (not needed locally)
+uploads/

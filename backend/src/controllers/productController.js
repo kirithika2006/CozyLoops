@@ -1,17 +1,9 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
+const cloudinary = require('../config/cloudinary');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const Analytics = require('../models/Analytics');
-const fs = require('fs');
-const path = require('path');
-
-// Helper function to get file URL
-const getFileUrl = (file, req) => {
-  if (!file) return null;
-  const relativePath = file.path.replace(/^.*?\\uploads/, 'uploads');
-  return `${req.protocol}://${req.get('host')}/${relativePath.replace(/\\/g, '/')}`;
-};
 
 // @desc    Create product
 // @route   POST /api/products
@@ -19,7 +11,6 @@ const getFileUrl = (file, req) => {
 const createProduct = catchAsync(async (req, res, next) => {
   console.log('📦 Creating product...');
   console.log('Request body:', req.body);
-  console.log('Files:', req.files ? req.files.length : 0);
 
   const {
     name,
@@ -60,13 +51,27 @@ const createProduct = catchAsync(async (req, res, next) => {
     return next(new AppError('Product with this SKU already exists', 400));
   }
 
-  // Process uploaded images
+  // Upload images to Cloudinary
   let images = [];
   if (req.files && req.files.length > 0) {
-    images = req.files.map((file) => ({
-      url: getFileUrl(file, req),
-      publicId: file.filename
-    }));
+    const uploadPromises = req.files.map(async (file) => {
+      // Convert buffer to base64 for Cloudinary upload
+      const base64String = file.buffer.toString('base64');
+      const uploadResult = await cloudinary.uploader.upload(`data:${file.mimetype};base64,${base64String}`, {
+        folder: 'cozyloops/products',
+        resource_type: 'image',
+        width: 800,
+        height: 800,
+        crop: 'fill',
+        quality: 'auto'
+      });
+      return {
+        url: uploadResult.secure_url,
+        publicId: uploadResult.public_id
+      };
+    });
+    images = await Promise.all(uploadPromises);
+    console.log(`✅ Uploaded ${images.length} images to Cloudinary`);
   }
 
   // Parse JSON fields
@@ -103,8 +108,6 @@ const createProduct = catchAsync(async (req, res, next) => {
     images
   };
 
-  console.log('📝 Product data:', productData);
-
   const product = await Product.create(productData);
 
   // Update category product count
@@ -130,75 +133,6 @@ const createProduct = catchAsync(async (req, res, next) => {
   });
 });
 
-// @desc    Get all products
-// @route   GET /api/products
-// @access  Public
-const getProducts = catchAsync(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 12;
-  const skip = (page - 1) * limit;
-  const sort = req.query.sort || '-createdAt';
-
-  // Build filter
-  const filter = {};
-  if (req.query.category) filter.category = req.query.category;
-  if (req.query.isFeatured === 'true') filter.isFeatured = true;
-  if (req.query.isTrending === 'true') filter.isTrending = true;
-  if (req.query.isNewArrival === 'true') filter.isNewArrival = true;
-  if (req.query.search) {
-    filter.$text = { $search: req.query.search };
-  }
-  if (req.query.minPrice || req.query.maxPrice) {
-    filter.price = {};
-    if (req.query.minPrice) filter.price.$gte = parseFloat(req.query.minPrice);
-    if (req.query.maxPrice) filter.price.$lte = parseFloat(req.query.maxPrice);
-  }
-  if (req.query.isAvailable === 'true') filter.isAvailable = true;
-
-  const products = await Product.find(filter)
-    .populate('category', 'name')
-    .sort(sort)
-    .skip(skip)
-    .limit(limit);
-
-  const total = await Product.countDocuments(filter);
-  const totalPages = Math.ceil(total / limit);
-
-  res.status(200).json({
-    success: true,
-    products,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1
-    }
-  });
-});
-
-// @desc    Get single product
-// @route   GET /api/products/:id
-// @access  Public
-const getProduct = catchAsync(async (req, res, next) => {
-  const product = await Product.findById(req.params.id)
-    .populate('category', 'name description');
-
-  if (!product) {
-    return next(new AppError('Product not found', 404));
-  }
-
-  // Increment views
-  product.views += 1;
-  await product.save();
-
-  res.status(200).json({
-    success: true,
-    product
-  });
-});
-
 // @desc    Update product
 // @route   PUT /api/products/:id
 // @access  Private
@@ -214,21 +148,30 @@ const updateProduct = catchAsync(async (req, res, next) => {
   
   // Handle images if uploaded
   if (req.files && req.files.length > 0) {
-    // Delete old images from storage
+    // Delete old images from Cloudinary
     for (const image of product.images) {
-      const filePath = path.join(__dirname, '../../uploads/images', path.basename(image.url));
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      if (image.publicId) {
+        await cloudinary.uploader.destroy(image.publicId);
       }
     }
 
-    // Upload new images
-    const imageUploads = req.files.map((file) => ({
-      url: getFileUrl(file, req),
-      publicId: file.filename
-    }));
-
-    updateData.images = imageUploads;
+    // Upload new images to Cloudinary
+    const uploadPromises = req.files.map(async (file) => {
+      const base64String = file.buffer.toString('base64');
+      const uploadResult = await cloudinary.uploader.upload(`data:${file.mimetype};base64,${base64String}`, {
+        folder: 'cozyloops/products',
+        resource_type: 'image',
+        width: 800,
+        height: 800,
+        crop: 'fill',
+        quality: 'auto'
+      });
+      return {
+        url: uploadResult.secure_url,
+        publicId: uploadResult.public_id
+      };
+    });
+    updateData.images = await Promise.all(uploadPromises);
   }
 
   // Parse JSON fields
@@ -280,11 +223,10 @@ const deleteProduct = catchAsync(async (req, res, next) => {
     return next(new AppError('Product not found', 404));
   }
 
-  // Delete images from storage
+  // Delete images from Cloudinary
   for (const image of product.images) {
-    const filePath = path.join(__dirname, '../../uploads/images', path.basename(image.url));
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    if (image.publicId) {
+      await cloudinary.uploader.destroy(image.publicId);
     }
   }
 
@@ -309,6 +251,73 @@ const deleteProduct = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: 'Product deleted successfully'
+  });
+});
+
+// @desc    Get all products
+// @route   GET /api/products
+// @access  Public
+const getProducts = catchAsync(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 12;
+  const skip = (page - 1) * limit;
+  const sort = req.query.sort || '-createdAt';
+
+  const filter = {};
+  if (req.query.category) filter.category = req.query.category;
+  if (req.query.isFeatured === 'true') filter.isFeatured = true;
+  if (req.query.isTrending === 'true') filter.isTrending = true;
+  if (req.query.isNewArrival === 'true') filter.isNewArrival = true;
+  if (req.query.search) {
+    filter.$text = { $search: req.query.search };
+  }
+  if (req.query.minPrice || req.query.maxPrice) {
+    filter.price = {};
+    if (req.query.minPrice) filter.price.$gte = parseFloat(req.query.minPrice);
+    if (req.query.maxPrice) filter.price.$lte = parseFloat(req.query.maxPrice);
+  }
+  if (req.query.isAvailable === 'true') filter.isAvailable = true;
+
+  const products = await Product.find(filter)
+    .populate('category', 'name')
+    .sort(sort)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Product.countDocuments(filter);
+  const totalPages = Math.ceil(total / limit);
+
+  res.status(200).json({
+    success: true,
+    products,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1
+    }
+  });
+});
+
+// @desc    Get single product
+// @route   GET /api/products/:id
+// @access  Public
+const getProduct = catchAsync(async (req, res, next) => {
+  const product = await Product.findById(req.params.id)
+    .populate('category', 'name description');
+
+  if (!product) {
+    return next(new AppError('Product not found', 404));
+  }
+
+  product.views += 1;
+  await product.save();
+
+  res.status(200).json({
+    success: true,
+    product
   });
 });
 

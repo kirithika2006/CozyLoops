@@ -1,16 +1,8 @@
 const Video = require('../models/Video');
+const cloudinary = require('../config/cloudinary');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const Analytics = require('../models/Analytics');
-const fs = require('fs');
-const path = require('path');
-
-// Helper function to get file URL
-const getFileUrl = (file, req) => {
-  if (!file) return null;
-  const relativePath = file.path.replace(/^.*?\\uploads/, 'uploads');
-  return `${req.protocol}://${req.get('host')}/${relativePath.replace(/\\/g, '/')}`;
-};
 
 // @desc    Upload video
 // @route   POST /api/videos
@@ -18,7 +10,6 @@ const getFileUrl = (file, req) => {
 const uploadVideo = catchAsync(async (req, res, next) => {
   console.log('📹 Uploading video...');
   console.log('Request body:', req.body);
-  console.log('Files:', req.files ? Object.keys(req.files) : 'No files');
 
   const { title, description, category, hashtags } = req.body;
 
@@ -46,9 +37,35 @@ const uploadVideo = catchAsync(async (req, res, next) => {
   const videoFile = req.files.video[0];
   const thumbnailFile = req.files.thumbnail[0];
 
-  // Get file URLs
-  const videoUrl = getFileUrl(videoFile, req);
-  const thumbnailUrl = getFileUrl(thumbnailFile, req);
+  // Upload video to Cloudinary
+  console.log('📤 Uploading video to Cloudinary...');
+  const videoBase64 = videoFile.buffer.toString('base64');
+  const videoUploadResult = await cloudinary.uploader.upload(`data:${videoFile.mimetype};base64,${videoBase64}`, {
+    folder: 'cozyloops/videos',
+    resource_type: 'video',
+    eager: [
+      { width: 720, height: 480, crop: 'limit' },
+      { width: 480, height: 320, crop: 'limit' }
+    ],
+    eager_async: true
+  });
+
+  // Upload thumbnail to Cloudinary
+  console.log('📤 Uploading thumbnail to Cloudinary...');
+  const thumbBase64 = thumbnailFile.buffer.toString('base64');
+  const thumbUploadResult = await cloudinary.uploader.upload(`data:${thumbnailFile.mimetype};base64,${thumbBase64}`, {
+    folder: 'cozyloops/videos/thumbnails',
+    resource_type: 'image',
+    width: 600,
+    height: 600,
+    crop: 'fill'
+  });
+
+  // Get video duration
+  const duration = Math.round(videoUploadResult.duration || 0);
+  if (duration > 180) {
+    return next(new AppError('Video duration exceeds 3 minutes limit', 400));
+  }
 
   // Parse hashtags
   let hashtagsArray = [];
@@ -56,7 +73,6 @@ const uploadVideo = catchAsync(async (req, res, next) => {
     try {
       hashtagsArray = typeof hashtags === 'string' ? JSON.parse(hashtags) : hashtags;
     } catch (e) {
-      // If parsing fails, treat as comma-separated string
       hashtagsArray = hashtags.split(',').map(tag => tag.trim()).filter(tag => tag);
     }
   }
@@ -65,13 +81,13 @@ const uploadVideo = catchAsync(async (req, res, next) => {
   const videoData = {
     title: title.trim(),
     description: description.trim(),
-    videoUrl: videoUrl,
-    publicId: videoFile.filename,
-    thumbnail: thumbnailUrl,
-    thumbnailPublicId: thumbnailFile.filename,
+    videoUrl: videoUploadResult.secure_url,
+    publicId: videoUploadResult.public_id,
+    thumbnail: thumbUploadResult.secure_url,
+    thumbnailPublicId: thumbUploadResult.public_id,
     category: category || 'General',
     hashtags: hashtagsArray || [],
-    duration: 0,
+    duration: duration,
     isActive: true
   };
 
@@ -97,6 +113,104 @@ const uploadVideo = catchAsync(async (req, res, next) => {
     video
   });
 });
+
+// @desc    Update video
+// @route   PUT /api/videos/:id
+// @access  Private
+const updateVideo = catchAsync(async (req, res, next) => {
+  const video = await Video.findById(req.params.id);
+  if (!video) {
+    return next(new AppError('Video not found', 404));
+  }
+
+  const updateData = { ...req.body };
+  
+  // Update thumbnail if uploaded
+  if (req.file) {
+    // Delete old thumbnail from Cloudinary
+    if (video.thumbnailPublicId) {
+      await cloudinary.uploader.destroy(video.thumbnailPublicId);
+    }
+
+    // Upload new thumbnail to Cloudinary
+    const base64String = req.file.buffer.toString('base64');
+    const uploadResult = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${base64String}`, {
+      folder: 'cozyloops/videos/thumbnails',
+      resource_type: 'image',
+      width: 600,
+      height: 600,
+      crop: 'fill'
+    });
+
+    updateData.thumbnail = uploadResult.secure_url;
+    updateData.thumbnailPublicId = uploadResult.public_id;
+  }
+
+  // Parse hashtags if provided
+  if (updateData.hashtags) {
+    try {
+      updateData.hashtags = typeof updateData.hashtags === 'string' 
+        ? JSON.parse(updateData.hashtags) 
+        : updateData.hashtags;
+    } catch (e) {
+      updateData.hashtags = updateData.hashtags.split(',').map(tag => tag.trim());
+    }
+  }
+
+  const updatedVideo = await Video.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    { new: true, runValidators: true }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: 'Video updated successfully',
+    video: updatedVideo
+  });
+});
+
+// @desc    Delete video
+// @route   DELETE /api/videos/:id
+// @access  Private
+const deleteVideo = catchAsync(async (req, res, next) => {
+  const video = await Video.findById(req.params.id);
+  if (!video) {
+    return next(new AppError('Video not found', 404));
+  }
+
+  // Delete video from Cloudinary
+  if (video.publicId) {
+    await cloudinary.uploader.destroy(video.publicId, { resource_type: 'video' });
+  }
+
+  // Delete thumbnail from Cloudinary
+  if (video.thumbnailPublicId) {
+    await cloudinary.uploader.destroy(video.thumbnailPublicId);
+  }
+
+  // Delete video from database
+  await video.deleteOne();
+
+  // Update analytics
+  await Analytics.findOneAndUpdate(
+    {},
+    { 
+      $inc: { totalVideos: -1 },
+      $pull: { 'latestUploads.videos': video._id }
+    },
+    { new: true }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: 'Video deleted successfully'
+  });
+});
+
+// @desc    Get all videos
+// @route   GET /api/videos
+// @access  Public
 const getVideos = catchAsync(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 12;
@@ -139,95 +253,12 @@ const getVideo = catchAsync(async (req, res, next) => {
     return next(new AppError('Video not found', 404));
   }
 
-  // Increment views
   video.views += 1;
   await video.save();
 
   res.status(200).json({
     success: true,
     video
-  });
-});
-
-// @desc    Update video
-// @route   PUT /api/videos/:id
-// @access  Private
-const updateVideo = catchAsync(async (req, res, next) => {
-  const video = await Video.findById(req.params.id);
-  if (!video) {
-    return next(new AppError('Video not found', 404));
-  }
-
-  const updateData = { ...req.body };
-  
-  // Update thumbnail if uploaded
-  if (req.file) {
-    const thumbnailUrl = getFileUrl(req.file, req);
-    updateData.thumbnail = thumbnailUrl;
-    updateData.thumbnailPublicId = req.file.filename;
-  }
-
-  // Parse hashtags if provided
-  if (updateData.hashtags) {
-    try {
-      updateData.hashtags = typeof updateData.hashtags === 'string' 
-        ? JSON.parse(updateData.hashtags) 
-        : updateData.hashtags;
-    } catch (e) {
-      updateData.hashtags = updateData.hashtags.split(',').map(tag => tag.trim());
-    }
-  }
-
-  const updatedVideo = await Video.findByIdAndUpdate(
-    req.params.id,
-    updateData,
-    { new: true, runValidators: true }
-  );
-
-  res.status(200).json({
-    success: true,
-    message: 'Video updated successfully',
-    video: updatedVideo
-  });
-});
-
-// @desc    Delete video
-// @route   DELETE /api/videos/:id
-// @access  Private
-const deleteVideo = catchAsync(async (req, res, next) => {
-  const video = await Video.findById(req.params.id);
-  if (!video) {
-    return next(new AppError('Video not found', 404));
-  }
-
-  // Delete video file from storage
-  const videoPath = path.join(__dirname, '../../uploads/videos', path.basename(video.videoUrl));
-  if (fs.existsSync(videoPath)) {
-    fs.unlinkSync(videoPath);
-  }
-
-  // Delete thumbnail file from storage
-  const thumbnailPath = path.join(__dirname, '../../uploads/images', path.basename(video.thumbnail));
-  if (fs.existsSync(thumbnailPath)) {
-    fs.unlinkSync(thumbnailPath);
-  }
-
-  // Delete video from database
-  await video.deleteOne();
-
-  // Update analytics
-  await Analytics.findOneAndUpdate(
-    {},
-    { 
-      $inc: { totalVideos: -1 },
-      $pull: { 'latestUploads.videos': video._id }
-    },
-    { new: true }
-  );
-
-  res.status(200).json({
-    success: true,
-    message: 'Video deleted successfully'
   });
 });
 
@@ -253,7 +284,6 @@ const toggleLike = catchAsync(async (req, res, next) => {
   });
 
   if (existingLike) {
-    // Unlike
     await existingLike.deleteOne();
     video.likes -= 1;
     await video.save();
@@ -271,7 +301,6 @@ const toggleLike = catchAsync(async (req, res, next) => {
     });
   }
 
-  // Like
   await Like.create({
     type: 'video',
     typeId: video._id,
