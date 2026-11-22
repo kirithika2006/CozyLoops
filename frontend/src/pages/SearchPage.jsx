@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
+import { FaFilter, FaSearch } from 'react-icons/fa';
 import { Helmet } from 'react-helmet-async';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
@@ -27,39 +27,42 @@ const SearchPage = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [error, setError] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    let active = true;
     const fetchData = async () => {
+      setLoading(true);
+      setError('');
       try {
-        setLoading(true);
-        
-        // Fetch categories
-        const categoriesResponse = await categoryService.getCategories();
-        setCategories(categoriesResponse.categories || []);
-        
-        // Fetch products with search and filters
-        const productParams = {
-          search: query,
-          limit: 20
-        };
-        if (filters.category) productParams.category = filters.category;
-        if (filters.sort) productParams.sort = filters.sort;
-        if (filters.minPrice) productParams.minPrice = filters.minPrice;
-        if (filters.maxPrice) productParams.maxPrice = filters.maxPrice;
-        if (filters.isAvailable) productParams.isAvailable = filters.isAvailable;
-        
-        const response = await productService.getProducts(productParams);
+        const [categoriesResult, response] = await Promise.all([
+          categoryService.getCategories().catch(() => ({ categories: [] })),
+          productService.getProducts(productParams)
+        ]);
+        if (!active) return;
+        setCategories(categoriesResult.categories || []);
         setProducts(response.products || []);
         setTotalProducts(response.pagination?.total || 0);
       } catch (error) {
-        console.error('Error fetching search results:', error);
+        if (!active) return;
+        setProducts([]);
+        setTotalProducts(0);
+        setError(error.response?.data?.message || 'Search is temporarily unavailable. Please try again.');
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
+    const productParams = { search: query.trim(), limit: 20 };
+    if (filters.category) productParams.category = filters.category;
+    if (filters.sort) productParams.sort = filters.sort;
+    if (filters.minPrice) productParams.minPrice = filters.minPrice;
+    if (filters.maxPrice) productParams.maxPrice = filters.maxPrice;
+    if (filters.isAvailable) productParams.isAvailable = filters.isAvailable;
     fetchData();
-  }, [query, filters]);
+    return () => { active = false; };
+  }, [query, filters, retryCount]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -236,9 +239,17 @@ const SearchPage = () => {
         )}
 
         {/* Products Grid */}
-        {products.length === 0 ? (
+        {error ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center" role="alert">
+            <p className="font-semibold text-red-800">We couldn’t load search results.</p>
+            <p className="mt-2 text-sm text-red-700">{error}</p>
+            <button type="button" onClick={() => setRetryCount(count => count + 1)} className="btn-secondary mt-5">
+              Try again
+            </button>
+          </div>
+        ) : products.length === 0 ? (
           <div className="glass-morphism rounded-3xl p-12 text-center">
-            <div className="text-6xl mb-4">🔍</div>
+            <FaSearch aria-hidden="true" className="mx-auto mb-4 h-10 w-10 text-primary-darkPink" />
             <h3 className="text-2xl font-display text-secondary-dark mb-2">
               No Products Found
             </h3>

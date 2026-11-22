@@ -12,7 +12,7 @@
   }
 
   body {
-    @apply bg-white font-body text-secondary-dark antialiased;
+    @apply bg-secondary-light font-body text-secondary-dark antialiased;
     scroll-behavior: smooth;
     overflow-x: hidden;
   }
@@ -71,8 +71,8 @@
   }
 
   .card-premium {
-    @apply bg-white rounded-2xl shadow-soft hover:shadow-premium 
-           transition-all duration-500 hover:-translate-y-2;
+    @apply bg-white rounded-2xl shadow-soft hover:shadow-premium
+           transition-all duration-200 hover:-translate-y-1;
   }
 
   .card-glass {
@@ -126,7 +126,7 @@
   }
 
   .text-gradient {
-    @apply bg-gradient-pink bg-clip-text text-transparent;
+    @apply font-semibold text-primary-darkPink;
   }
 
   .scroll-smooth {
@@ -141,6 +141,17 @@
   /* Grid layouts */
   .grid-auto-fit {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

@@ -38,7 +38,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gradient-to-b from-primary-lightPink/30 to-white pt-16 pb-8 mt-16">
+    <footer className="mt-16 border-t border-secondary-gray bg-secondary-light pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -46,7 +46,7 @@ const Footer = () => {
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
               <img src="/cozyloops-trademark.png" alt="" className="h-10 w-10 rounded-full object-cover" />
-              <span className="font-display text-2xl font-bold text-gradient">cozy.loopsss_</span>
+              <span className="font-display text-2xl font-bold text-primary-darkPink">cozy.loopsss_</span>
             </Link>
             <p className="text-secondary-dark/70 leading-relaxed">
               Handmade crochet creations crafted with care. Each piece is made with love and attention to detail.
@@ -114,7 +114,7 @@ const Footer = () => {
               © {new Date().getFullYear()} cozy.loopsss_. Made with{' '}
               <FaHeart className="inline text-primary-rosePink animate-pulse" /> in India
             </p>
-            <div className="flex items-center space-x-6 text-sm">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
               <Link to="/privacy" className="text-secondary-dark/60 hover:text-primary-rosePink transition-colors">
                 Privacy Policy
               </Link>

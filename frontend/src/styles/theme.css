@@ -1,20 +1,20 @@
 /* Custom theme variables for CozyLoops */
 :root {
   --color-primary-white: #FFFFFF;
-  --color-primary-baby-pink: #FFB6C1;
-  --color-primary-rose-pink: #FF69B4;
-  --color-primary-soft-peach: #FFDAB9;
-  --color-primary-lavender: #E6E6FA;
-  --color-primary-dark-pink: #DB7093;
-  --color-primary-light-pink: #FFE4E1;
+  --color-primary-baby-pink: #E7D1D7;
+  --color-primary-rose-pink: #A23F62;
+  --color-primary-soft-peach: #E9D9C9;
+  --color-primary-lavender: #E7E3EC;
+  --color-primary-dark-pink: #79354D;
+  --color-primary-light-pink: #F7EDF0;
   
-  --color-secondary-gray: #F5F5F5;
-  --color-secondary-dark: #333333;
-  --color-secondary-light: #FAFAFA;
+  --color-secondary-gray: #F0EEEB;
+  --color-secondary-dark: #3B3034;
+  --color-secondary-light: #FAF8F5;
   
-  --shadow-soft: 0 10px 30px -5px rgba(255, 182, 193, 0.3);
-  --shadow-glass: 0 8px 32px 0 rgba(255, 182, 193, 0.15);
-  --shadow-premium: 0 20px 60px -10px rgba(255, 105, 180, 0.2);
+  --shadow-soft: 0 8px 24px -8px rgba(59, 48, 52, 0.14);
+  --shadow-glass: 0 8px 24px 0 rgba(59, 48, 52, 0.08);
+  --shadow-premium: 0 12px 32px -12px rgba(59, 48, 52, 0.2);
   
   --radius-default: 1rem;
   --radius-full: 9999px;

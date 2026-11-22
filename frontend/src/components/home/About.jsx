@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaHeart, FaHandSpock, FaStar, FaUsers } from 'react-icons/fa';
+import { FaHeart, FaAward, FaStar, FaUsers } from 'react-icons/fa';
 
 const About = () => {
   const features = [
@@ -10,7 +10,7 @@ const About = () => {
       description: 'Every piece is carefully crafted with attention to detail and love'
     },
     {
-      icon: FaHandSpock,
+      icon: FaAward,
       title: 'Quality Materials',
       description: 'We use premium yarns and materials for lasting quality'
     },
@@ -27,7 +27,7 @@ const About = () => {
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-b from-primary-lightPink/20 to-white">
+    <section className="py-16 bg-primary-lightPink/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -50,8 +50,8 @@ const About = () => {
             viewport={{ once: true }}
             className="space-y-6"
           >
-            <h3 className="font-display text-3xl font-bold text-secondary-dark">
-              Your Destination for <span className="text-gradient">Handmade Crochet</span>
+            <h3 className="font-display text-3xl md:text-4xl font-bold leading-relaxed text-secondary-dark">
+              Your Destination for <span className="text-primary-darkPink">Handmade Crochet</span>
             </h3>
             <p className="text-secondary-dark/70 leading-relaxed">
               cozy.loopsss_ was born from a love of crochet and a desire to share that joy with others. 
@@ -66,7 +66,7 @@ const About = () => {
 
             {/* Removed the "Meet Our Team" section */}
 
-            <div className="flex items-center space-x-8 pt-4">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4">
               <div>
                 <p className="font-display text-2xl font-bold text-primary-rosePink">100+</p>
                 <p className="text-sm text-secondary-dark/60">Happy Customers</p>
@@ -76,7 +76,7 @@ const About = () => {
                 <p className="text-sm text-secondary-dark/60">Unique Designs</p>
               </div>
               <div>
-                <p className="font-display text-2xl font-bold text-primary-rosePink">4.9⭐</p>
+                <p className="font-display text-2xl font-bold text-primary-rosePink">4.9</p>
                 <p className="text-sm text-secondary-dark/60">Average Rating</p>
               </div>
             </div>
@@ -89,29 +89,13 @@ const About = () => {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="relative rounded-3xl overflow-hidden shadow-premium">
+            <div className="relative overflow-hidden rounded-3xl bg-secondary-gray">
               <img
                 src="https://t4.ftcdn.net/jpg/00/92/10/87/360_F_92108736_2pK0ze82VQNRHmvE2EZKioQhFPhIAjW3.jpg"
                 alt="Colorful crochet yarn and handmade crochet flowers"
-                className="w-full h-96 object-cover"
+                className="block h-72 w-full object-cover sm:h-96"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            </div>
-            
-            {/* Floating stats */}
-            <div className="absolute -bottom-6 -left-6 glass-morphism rounded-2xl p-4 shadow-soft">
-              <div className="flex items-center space-x-4">
-                <div className="text-center">
-                  <p className="font-display text-2xl font-bold text-primary-rosePink">100+</p>
-                  <p className="text-xs text-secondary-dark/60">Happy Customers</p>
-                </div>
-                <div className="w-px h-10 bg-primary-babyPink/30" />
-                <div className="text-center">
-                  <p className="font-display text-2xl font-bold text-primary-rosePink">50+</p>
-                  <p className="text-xs text-secondary-dark/60">Unique Designs</p>
-                </div>
-              </div>
             </div>
           </motion.div>
         </div>
@@ -125,7 +109,7 @@ const About = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="text-center p-4 rounded-2xl glass-morphism hover:shadow-premium transition-all duration-300"
+              className="rounded-2xl border border-secondary-gray bg-white p-4 text-center shadow-sm transition-shadow duration-200 hover:shadow-soft"
             >
               <div className="w-12 h-12 mx-auto mb-3 bg-gradient-pink/10 rounded-full flex items-center justify-center">
                 <feature.icon className="text-primary-rosePink text-xl" />

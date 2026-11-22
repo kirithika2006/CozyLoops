@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isTouchDevice] = useState(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches);
   const [imageIndex, setImageIndex] = useState(0);
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -57,21 +58,21 @@ const ProductCard = ({ product }) => {
 
   return (
     <motion.div
-      className="card-premium group relative overflow-hidden"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-secondary-gray bg-white shadow-soft transition-shadow duration-200 hover:shadow-premium"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
         setImageIndex(0);
       }}
-      whileHover={{ y: -8 }}
+      whileHover={{ y: -3 }}
     >
       <div className="block">
-        <div className="relative aspect-square overflow-hidden bg-primary-lightPink/20">
-          <Link to={`/product/${_id}`} aria-label={`View ${name}`} className="block h-full w-full">
+        <div className="relative aspect-square bg-secondary-gray/60 p-3">
+          <Link to={`/product/${_id}`} aria-label={`View ${name}`} className="block h-full w-full overflow-hidden rounded-xl bg-secondary-light p-3">
             <motion.img
               src={images && images.length > 0 ? images[imageIndex].url : 'https://via.placeholder.com/400x400?text=No+Image'}
               alt={name}
-              className="w-full h-full object-cover transition-all duration-700"
+              className="h-full w-full rounded-lg object-contain transition-transform duration-300"
               style={{ 
                 transform: isHovered ? 'scale(1.05)' : 'scale(1)',
               }}
@@ -117,7 +118,7 @@ const ProductCard = ({ product }) => {
               )}
               {isTrending && (
                 <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
-                  🔥 Trending
+                  Trending
                 </span>
               )}
               {(!isAvailable || (product.fulfillmentType !== 'MADE_TO_ORDER' && stock <= 0)) && (
@@ -131,12 +132,13 @@ const ProductCard = ({ product }) => {
           <motion.div
               className="absolute right-3 top-3 z-10 flex flex-col gap-2"
               initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : 20 }}
-              transition={{ duration: 0.3 }}
+              animate={{ opacity: isHovered || isTouchDevice ? 1 : 0, x: isHovered || isTouchDevice ? 0 : 12 }}
+              transition={{ duration: 0.18 }}
             >
               <button
                 onClick={handleToggleWishlist}
-                className="p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-soft hover:shadow-premium transition-all duration-300 hover:scale-110"
+                aria-label={isWishlisted ? `Remove ${name} from wishlist` : `Add ${name} to wishlist`}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-secondary-dark shadow-soft transition-colors hover:text-primary-darkPink"
               >
                 <FaHeart className={`text-lg ${isWishlisted ? 'text-primary-rosePink' : 'text-gray-400'}`} />
               </button>
@@ -144,7 +146,7 @@ const ProductCard = ({ product }) => {
                 type="button"
                 aria-label={`View ${name} details`}
                 onClick={handleViewDetails}
-                className="p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-soft hover:shadow-premium transition-all duration-300 hover:scale-110"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-secondary-dark shadow-soft transition-colors hover:text-primary-darkPink"
               >
                 <FaEye className="text-lg text-gray-600" />
               </button>
@@ -154,13 +156,13 @@ const ProductCard = ({ product }) => {
           <motion.div
               className="absolute bottom-0 left-0 right-0 z-10 p-4 bg-gradient-to-t from-black/60 to-transparent"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
-              transition={{ duration: 0.3 }}
+              animate={{ opacity: isHovered || isTouchDevice ? 1 : 0, y: isHovered || isTouchDevice ? 0 : 12 }}
+              transition={{ duration: 0.18 }}
             >
               <button
                 onClick={handleAddToCart}
                 disabled={!isAvailable || (product.fulfillmentType !== 'MADE_TO_ORDER' && stock === 0)}
-                className="w-full py-2.5 bg-white text-secondary-dark rounded-full font-semibold hover:bg-gradient-pink hover:text-white transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-semibold text-secondary-dark transition-colors duration-150 hover:bg-primary-darkPink hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaShoppingCart className="text-sm" />
                 {product.fulfillmentType === 'MADE_TO_ORDER' ? 'Made to Order' : stock > 0 ? 'Add to Cart' : 'Out of Stock'}
@@ -169,14 +171,14 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Product Info - Not inside Link */}
-        <div className="p-4 space-y-2">
+        <div className="flex flex-1 flex-col space-y-2 p-4">
           <Link to={`/product/${_id}`} className="block">
             <h3 className="font-semibold text-secondary-dark text-sm line-clamp-1 group-hover:text-primary-rosePink transition-colors">
               {name}
             </h3>
           </Link>
           
-          <p className="text-secondary-dark/60 text-xs line-clamp-2">
+          <p className="min-h-8 text-secondary-dark/75 text-xs line-clamp-2">
             {description}
           </p>
 

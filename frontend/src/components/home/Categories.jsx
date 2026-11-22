@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { FaSeedling, FaGift, FaKey, FaMobileAlt, FaSmile, FaTags } from 'react-icons/fa';
 import { categoryService } from '../../services/categoryService';
 import SkeletonLoader from '../common/SkeletonLoader';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const getCategoryIcon = (name = '') => {
+    const normalized = name.toLowerCase();
+    if (normalized.includes('flower')) return FaSeedling;
+    if (normalized.includes('bouquet')) return FaGift;
+    if (normalized.includes('keychain') || normalized.includes('key chain')) return FaKey;
+    if (normalized.includes('phone') || normalized.includes('charm')) return FaMobileAlt;
+    if (normalized.includes('plush') || normalized.includes('toy')) return FaSmile;
+    if (normalized.includes('gift') || normalized.includes('personal')) return FaGift;
+    return FaTags;
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -26,7 +37,7 @@ const Categories = () => {
 
   if (loading) {
     return (
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-secondary-gray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="section-title mb-8">Shop by Category</h2>
           <SkeletonLoader type="card" count={6} />
@@ -40,7 +51,7 @@ const Categories = () => {
   }
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-secondary-gray">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -65,21 +76,22 @@ const Categories = () => {
             >
               <Link
                 to={`/shop?category=${category._id}`}
-                className="block glass-morphism rounded-2xl p-4 text-center transition-all duration-300 hover:shadow-premium"
+                className="block h-full rounded-2xl border border-secondary-gray bg-white p-4 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-soft"
               >
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-pink/10 flex items-center justify-center">
+                <div className="mx-auto mb-3 flex aspect-square w-full max-w-40 items-center justify-center overflow-hidden rounded-xl bg-secondary-light p-3">
                   {category.image && category.image !== 'https://via.placeholder.com/400x400?text=Coming+Soon' ? (
                     <img
                       src={category.image}
                       alt={category.name}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full rounded-lg object-cover"
                       loading="lazy"
                     />
                   ) : (
-                    <span className="text-3xl">🧶</span>
+                    React.createElement(getCategoryIcon(category.name), { className: 'h-10 w-10 text-primary-darkPink', 'aria-hidden': true })
                   )}
                 </div>
-                <h3 className="font-semibold text-secondary-dark text-sm">
+                <h3 className="flex items-center justify-center gap-2 font-semibold text-secondary-dark text-sm">
+                  {React.createElement(getCategoryIcon(category.name), { className: 'h-4 w-4 flex-shrink-0 text-primary-darkPink', 'aria-hidden': true })}
                   {category.name}
                 </h3>
                 <p className="text-xs text-secondary-dark/60 mt-1">

@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, MotionConfig } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AdminProvider } from './context/AdminContext';
@@ -9,7 +9,6 @@ import Navbar from './components/common/Navbar';
 import Footer from './components/footer/Footer';
 import ScrollProgress from './components/common/ScrollProgress';
 import BackToTop from './components/common/BackToTop';
-import AnimatedCursor from './components/common/AnimatedCursor';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import AdminDashboard from './components/admin/AdminDashboard';
 
@@ -25,6 +24,8 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
 const MyOrdersPage = lazy(() => import('./pages/MyOrdersPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
 
 function App() {
   const location = useLocation();
@@ -34,15 +35,16 @@ function App() {
 
   // Scroll to top on route change
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    window.scrollTo({ top: 0, behavior });
   }, [location.pathname]);
 
   return (
+    <MotionConfig reducedMotion="user">
     <AdminProvider>
       <CartProvider>
         <WishlistProvider>
-          <div className="min-h-screen bg-white dark:bg-secondary-light">
-            {!isAdminRoute && <AnimatedCursor />}
+          <div className="min-h-screen bg-secondary-light">
             {!isAdminRoute && <ScrollProgress />}
             {!isAdminRoute && <Navbar />}
             
@@ -60,6 +62,8 @@ function App() {
                     <Route path="/wishlist" element={<WishlistPage />} />
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/search" element={<SearchPage />} />
+                    <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
                     <Route path="/admin/*" element={<AdminDashboard />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
@@ -98,6 +102,7 @@ function App() {
         </WishlistProvider>
       </CartProvider>
     </AdminProvider>
+    </MotionConfig>
   );
 }
 

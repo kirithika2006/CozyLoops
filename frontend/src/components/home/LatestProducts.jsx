@@ -40,7 +40,7 @@ const LatestProducts = () => {
 
   if (loading) {
     return (
-      <section className="py-16 bg-primary-lightPink/20">
+      <section className="py-16 bg-secondary-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="section-title mb-8">Latest Arrivals</h2>
           <SkeletonLoader type="product" count={4} />
@@ -51,7 +51,7 @@ const LatestProducts = () => {
 
   if (products.length === 0) {
     return (
-      <section className="py-16 bg-primary-lightPink/20">
+      <section className="py-16 bg-secondary-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="section-title mb-8">Latest Arrivals</h2>
           <div className="glass-morphism rounded-3xl p-12 text-center">
@@ -69,7 +69,7 @@ const LatestProducts = () => {
   }
 
   return (
-    <section className="py-16 bg-primary-lightPink/20">
+    <section className="py-16 bg-secondary-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

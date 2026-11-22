@@ -37,7 +37,7 @@ const Hero = () => {
               transition={{ delay: 0.2 }}
               className="inline-block px-4 py-2 bg-primary-babyPink/20 rounded-full"
             >
-              <span className="text-primary-rosePink font-medium text-sm">Handmade with Love</span>
+              <span className="text-primary-darkPink font-semibold text-sm">Handmade with Love</span>
             </motion.div>
 
             {/* Heading */}
@@ -48,7 +48,7 @@ const Hero = () => {
               className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
             >
               <span className="text-secondary-dark">Welcome to </span>
-              <span className="text-gradient">cozy.loopsss_</span>
+              <span className="text-primary-darkPink">cozy.loopsss_</span>
             </motion.h1>
 
             {/* Description */}
@@ -56,7 +56,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-lg text-secondary-dark/70 leading-relaxed max-w-lg"
+              className="max-w-lg text-lg font-medium leading-8 text-secondary-dark"
             >
               Handmade crochet creations crafted with care. We offer custom crochet flowers, 
               bouquets, keychains, phone charms, plushies and personalized gifts. Each piece 

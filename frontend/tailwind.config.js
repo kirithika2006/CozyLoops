@@ -10,17 +10,17 @@ export default {
       colors: {
         primary: {
           white: '#FFFFFF',
-          babyPink: '#FFB6C1',
-          rosePink: '#FF69B4',
-          softPeach: '#FFDAB9',
-          lavender: '#E6E6FA',
-          darkPink: '#DB7093',
-          lightPink: '#FFE4E1',
+          babyPink: '#E7D1D7',
+          rosePink: '#A23F62',
+          softPeach: '#E9D9C9',
+          lavender: '#E7E3EC',
+          darkPink: '#79354D',
+          lightPink: '#F7EDF0',
         },
         secondary: {
-          gray: '#F5F5F5',
-          dark: '#333333',
-          light: '#FAFAFA',
+          gray: '#F0EEEB',
+          dark: '#3B3034',
+          light: '#FAF8F5',
         }
       },
       fontFamily: {
@@ -29,14 +29,14 @@ export default {
         'cursive': ['Dancing Script', 'cursive'],
       },
       backgroundImage: {
-        'gradient-pink': 'linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%)',
-        'gradient-peach': 'linear-gradient(135deg, #FFDAB9 0%, #FFE4E1 100%)',
-        'gradient-lavender': 'linear-gradient(135deg, #E6E6FA 0%, #D8BFD8 100%)',
+        'gradient-pink': 'linear-gradient(135deg, #A23F62 0%, #79354D 100%)',
+        'gradient-peach': 'linear-gradient(135deg, #E9D9C9 0%, #F7EDF0 100%)',
+        'gradient-lavender': 'linear-gradient(135deg, #E7E3EC 0%, #D7CFDD 100%)',
       },
       boxShadow: {
-        'soft': '0 10px 30px -5px rgba(255, 182, 193, 0.3)',
-        'glass': '0 8px 32px 0 rgba(255, 182, 193, 0.15)',
-        'premium': '0 20px 60px -10px rgba(255, 105, 180, 0.2)',
+        'soft': '0 8px 24px -8px rgba(59, 48, 52, 0.14)',
+        'glass': '0 8px 24px 0 rgba(59, 48, 52, 0.08)',
+        'premium': '0 12px 32px -12px rgba(59, 48, 52, 0.2)',
       },
       backdropBlur: {
         'glass': 'blur(10px)',
