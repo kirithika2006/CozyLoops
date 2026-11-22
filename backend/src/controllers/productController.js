@@ -290,7 +290,22 @@ const getProducts = catchAsync(async (req, res, next) => {
   if (req.query.isTrending === 'true') filter.isTrending = true;
   if (req.query.isNewArrival === 'true') filter.isNewArrival = true;
   if (req.query.search) {
-    filter.$text = { $search: req.query.search };
+    const searchTerm = String(req.query.search).trim().slice(0, 100);
+    if (searchTerm) {
+      const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const match = new RegExp(escapedTerm, 'i');
+      const matchingCategories = await Category.find({ name: match }).select('_id').lean();
+      filter.$or = [
+        { name: match },
+        { description: match },
+        { sku: match },
+        { material: match },
+        { colorsAvailable: match },
+        { sizesAvailable: match },
+        { tags: match },
+        ...(matchingCategories.length ? [{ category: { $in: matchingCategories.map(({ _id }) => _id) } }] : [])
+      ];
+    }
   }
   if (req.query.minPrice || req.query.maxPrice) {
     filter.price = {};
@@ -298,6 +313,7 @@ const getProducts = catchAsync(async (req, res, next) => {
     if (req.query.maxPrice) filter.price.$lte = parseFloat(req.query.maxPrice);
   }
   if (req.query.isAvailable === 'true') filter.isAvailable = true;
+  if (req.query.isAvailable === 'false') filter.isAvailable = false;
 
   const products = await Product.find(filter)
     .populate('category', 'name')
