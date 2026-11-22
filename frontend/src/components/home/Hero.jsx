@@ -5,16 +5,6 @@ import { FaArrowRight } from 'react-icons/fa';
 import Button from '../common/Button';
 
 const Hero = () => {
-  // Floating elements positions
-  const floatingElements = [
-    { icon: 'ðŸŒ¸', x: '10%', y: '20%', delay: 0 },
-    { icon: 'ðŸ§¶', x: '85%', y: '15%', delay: 1 },
-    { icon: 'ðŸŒº', x: '5%', y: '70%', delay: 2 },
-    { icon: 'ðŸ§µ', x: '90%', y: '75%', delay: 0.5 },
-    { icon: 'ðŸ’', x: '50%', y: '10%', delay: 1.5 },
-    { icon: 'ðŸŽ€', x: '45%', y: '85%', delay: 2.5 },
-  ];
-
   const quotes = [
     '"Made with yarn, stitched with love."',
     '"Every stitch tells a story."',
@@ -30,27 +20,6 @@ const Hero = () => {
           backgroundSize: '50px 50px'
         }} />
       </div>
-
-      {/* Floating Elements */}
-      {floatingElements.map((el, index) => (
-        <motion.div
-          key={index}
-          className="absolute text-4xl md:text-6xl pointer-events-none"
-          style={{ left: el.x, top: el.y }}
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, 10, -10, 0],
-          }}
-          transition={{
-            duration: 6,
-            delay: el.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        >
-          {el.icon}
-        </motion.div>
-      ))}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -68,9 +37,7 @@ const Hero = () => {
               transition={{ delay: 0.2 }}
               className="inline-block px-4 py-2 bg-primary-babyPink/20 rounded-full"
             >
-              <span className="text-primary-rosePink font-medium text-sm">
-                âœ¨ Handmade with Love
-              </span>
+              <span className="text-primary-rosePink font-medium text-sm">Handmade with Love</span>
             </motion.div>
 
             {/* Heading */}
@@ -175,7 +142,7 @@ const Hero = () => {
                       alt="cozy.loopsss_ trademark logo with crochet flowers, yarn, and needles"
                       className="mx-auto w-[82%] max-w-[420px] animate-float object-contain"
                     />
-                    <p className="font-cursive text-2xl text-primary-rosePink">Handmade with â¤ï¸</p>
+                    <p className="font-cursive text-2xl text-primary-rosePink">Handmade with Love</p>
                   </div>
                 </div>
                 
@@ -184,34 +151,6 @@ const Hero = () => {
                 <div className="absolute bottom-4 left-4 w-32 h-32 bg-primary-rosePink/10 rounded-full blur-3xl animate-pulse" />
               </div>
 
-              {/* Floating badges */}
-              <motion.div
-                className="absolute -top-4 -right-4 glass-morphism rounded-2xl p-3 shadow-soft"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">â­</span>
-                  <div>
-                    <p className="font-bold text-sm">Handmade</p>
-                    <p className="text-xs text-secondary-dark/60">With love</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="absolute -bottom-4 -left-4 glass-morphism rounded-2xl p-3 shadow-soft"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, delay: 1 }}
-              >
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">ðŸŽ</span>
-                  <div>
-                    <p className="font-bold text-sm">Custom</p>
-                    <p className="text-xs text-secondary-dark/60">Made for you</p>
-                  </div>
-                </div>
-              </motion.div>
             </div>
           </motion.div>
         </div>

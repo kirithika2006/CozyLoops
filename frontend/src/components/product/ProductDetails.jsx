@@ -243,15 +243,15 @@ const ProductDetails = ({ product }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:gap-4">
         <Button
           variant="primary"
           size="lg"
           onClick={handleAddToCart}
           disabled={unavailable}
-          className="flex-1 min-w-[200px]"
+          className="w-full sm:min-w-[180px] sm:flex-1"
         >
-          <FaShoppingCart className="mr-2" />
+          <FaShoppingCart />
           Add to Cart
         </Button>
         <Button
@@ -259,19 +259,21 @@ const ProductDetails = ({ product }) => {
           size="lg"
           onClick={handleBuyNow}
           disabled={unavailable}
-          className="flex-1 min-w-[200px]"
+          className="w-full sm:min-w-[180px] sm:flex-1"
         >
           Buy Now
         </Button>
         <button
           onClick={() => toggleWishlist(product)}
-          className="p-4 border-2 border-primary-rosePink rounded-full hover:bg-primary-rosePink hover:text-white transition-all duration-300"
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          className="inline-flex h-12 w-12 items-center justify-center justify-self-center rounded-full border-2 border-primary-rosePink transition-all duration-300 hover:bg-primary-rosePink hover:text-white sm:h-14 sm:w-14"
         >
           <FaHeart className={isWishlisted ? 'text-primary-rosePink' : ''} />
         </button>
         <button
           onClick={handleShare}
-          className="p-4 border-2 border-gray-200 rounded-full hover:border-primary-rosePink transition-all duration-300"
+          aria-label={isCopied ? 'Product link copied' : 'Share product'}
+          className="inline-flex h-12 w-12 items-center justify-center justify-self-center rounded-full border-2 border-gray-200 transition-all duration-300 hover:border-primary-rosePink sm:h-14 sm:w-14"
         >
           {isCopied ? <FaCheck className="text-green-500" /> : <FaShare />}
         </button>

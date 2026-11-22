@@ -381,13 +381,15 @@ const Products = () => {
               <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
                 <button
                   onClick={() => handleOpenModal(product)}
-                  className="p-2 text-secondary-dark/60 hover:text-primary-rosePink transition-colors"
+                  aria-label={`Edit ${product.name}`}
+                  className="icon-action text-secondary-dark/60 hover:text-primary-rosePink"
                 >
                   <FaEdit />
                 </button>
                 <button
                   onClick={() => handleDelete(product._id)}
-                  className="p-2 text-secondary-dark/60 hover:text-red-500 transition-colors"
+                  aria-label={`Delete ${product.name}`}
+                  className="icon-action text-secondary-dark/60 hover:text-red-500"
                 >
                   <FaTrash />
                 </button>

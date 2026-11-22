@@ -172,13 +172,15 @@ const Categories = () => {
             <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
               <button
                 onClick={() => handleOpenModal(category)}
-                className="p-2 text-secondary-dark/60 hover:text-primary-rosePink transition-colors"
+                aria-label={`Edit ${category.name}`}
+                className="icon-action text-secondary-dark/60 hover:text-primary-rosePink"
               >
                 <FaEdit />
               </button>
               <button
                 onClick={() => handleDelete(category._id)}
-                className="p-2 text-secondary-dark/60 hover:text-red-500 transition-colors"
+                aria-label={`Delete ${category.name}`}
+                className="icon-action text-secondary-dark/60 hover:text-red-500"
               >
                 <FaTrash />
               </button>
