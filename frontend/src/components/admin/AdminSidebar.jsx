@@ -64,7 +64,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       )}
 
       {/* Sidebar */}
-      <aside 
+      <aside
+        id="admin-navigation"
         className={`fixed top-0 left-0 h-full bg-white shadow-soft z-50 transition-all duration-300 ${
           isOpen ? 'w-64' : 'w-20'
         } lg:block ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
@@ -82,7 +83,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           </div>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 rounded-lg hover:bg-primary-babyPink/20 transition-colors"
+            type="button"
+            aria-label={isOpen ? 'Close admin navigation' : 'Expand admin navigation'}
+            className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg hover:bg-primary-babyPink/20 transition-colors"
           >
             {isOpen ? <FaTimes /> : <FaBars />}
           </button>
@@ -94,6 +97,10 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
             <NavLink
               key={item.path}
               to={item.path}
+              end={item.path === '/admin'}
+              onClick={() => {
+                if (window.matchMedia('(max-width: 1023px)').matches) setIsOpen(false);
+              }}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
                   isActive
@@ -115,6 +122,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
+            type="button"
+            aria-label={isLoggingOut ? 'Logging out' : 'Logout'}
             className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-300 hover:bg-red-50 text-secondary-dark/70 hover:text-red-500 ${
               !isOpen && 'justify-center'
             }`}
