@@ -5,7 +5,6 @@ import { useAdmin } from '../../context/AdminContext';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import toast from 'react-hot-toast';
-import logo from '../../assets/images/logo/cozyloops-logo.svg';
 
 const RESEND_SECONDS = 60;
 
@@ -62,7 +61,7 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
     if (result.success) {
       onClose();
       navigate('/admin');
-      toast.success('Welcome to your CozyLoops dashboard.');
+      toast.success('Welcome to your cozy.loopsss_ dashboard.');
     }
   };
 
@@ -92,12 +91,13 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
           </button>
 
           <div className="mb-7 text-center">
-            <img src={logo} alt="CozyLoops" className="mx-auto mb-5 h-16 w-auto max-w-[190px] object-contain" />
+            <img src="/cozyloops-trademark.png" alt="" className="mx-auto mb-2 h-16 w-16 rounded-full object-cover" />
+            <div className="mb-5 font-display text-2xl font-bold text-primary-rosePink">cozy.loopsss_</div>
             <h2 id="owner-login-title" className="font-display text-2xl font-bold text-secondary-dark">
               {step === 'email' ? 'Welcome Back, Owner!' : 'Check your email'}
             </h2>
             <p className="mt-2 text-sm leading-6 text-secondary-dark/65">
-              {step === 'email' ? 'Secure access to your CozyLoops dashboard.' : `Enter the six-digit code sent to ${email.trim()}.`}
+              {step === 'email' ? 'Secure access to your cozy.loopsss_ dashboard.' : `Enter the six-digit code sent to ${email.trim()}.`}
             </p>
           </div>
 

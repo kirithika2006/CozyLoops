@@ -36,7 +36,7 @@ const About = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="section-title mb-2">About CozyLoops</h2>
+          <h2 className="section-title mb-2">About cozy.loopsss_</h2>
           <p className="text-secondary-dark/60 max-w-2xl mx-auto">
             We're passionate about creating beautiful crochet pieces that bring joy to your life
           </p>
@@ -54,7 +54,7 @@ const About = () => {
               Your Destination for <span className="text-gradient">Handmade Crochet</span>
             </h3>
             <p className="text-secondary-dark/70 leading-relaxed">
-              CozyLoops was born from a love of crochet and a desire to share that joy with others. 
+              cozy.loopsss_ was born from a love of crochet and a desire to share that joy with others. 
               Our mission is to create beautiful, high-quality crochet pieces that bring warmth and 
               happiness to every home.
             </p>

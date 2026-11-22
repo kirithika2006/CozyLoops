@@ -105,7 +105,7 @@ const Analytics = () => {
         <h2 className="font-display text-2xl font-bold text-secondary-dark">
           Analytics Dashboard
         </h2>
-        <p className="text-secondary-dark/60">Overview of your CozyLoops store</p>
+        <p className="text-secondary-dark/60">Overview of your cozy.loopsss_ store</p>
       </div>
 
       {/* Stats Grid */}

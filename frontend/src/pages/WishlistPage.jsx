@@ -20,7 +20,7 @@ const WishlistPage = () => {
     return (
       <>
         <Helmet>
-          <title>Wishlist - CozyLoops</title>
+          <title>Wishlist - cozy.loopsss_</title>
         </Helmet>
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center max-w-md">
@@ -45,7 +45,7 @@ const WishlistPage = () => {
   return (
     <>
       <Helmet>
-        <title>Wishlist - CozyLoops</title>
+        <title>Wishlist - cozy.loopsss_</title>
       </Helmet>
 
       <motion.div

@@ -17,7 +17,6 @@ import {
   FaTimes
 } from 'react-icons/fa';
 import { useAdmin } from '../../context/AdminContext';
-import logo from '../../assets/images/logo/cozyloops-logo.svg';
 import { orderService } from '../../services/orderService';
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
@@ -73,11 +72,11 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         {/* Logo & Toggle */}
         <div className="flex items-center justify-between h-20 px-4 border-b border-primary-babyPink/20">
           <div className="flex min-w-0 items-center gap-3">
-            <img src={logo} alt="CozyLoops" className={`${isOpen ? 'h-12 max-w-[155px]' : 'h-9 max-w-[40px]'} w-auto object-contain`} />
+            <img src="/cozyloops-trademark.png" alt={isOpen ? '' : 'cozy.loopsss_'} className={`${isOpen ? 'h-10 w-10' : 'h-9 w-9'} rounded-full object-cover`} />
             <span className="hidden">🧶</span>
             {isOpen && (
-              <span className="sr-only">
-                CozyLoops
+              <span className="font-display text-sm font-bold text-primary-rosePink">
+                cozy.loopsss_
               </span>
             )}
           </div>

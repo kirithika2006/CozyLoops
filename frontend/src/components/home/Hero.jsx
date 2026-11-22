@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaArrowRight } from 'react-icons/fa';
@@ -81,7 +81,7 @@ const Hero = () => {
               className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
             >
               <span className="text-secondary-dark">Welcome to </span>
-              <span className="text-gradient">CozyLoops</span>
+              <span className="text-gradient">cozy.loopsss_</span>
             </motion.h1>
 
             {/* Description */}
@@ -172,7 +172,7 @@ const Hero = () => {
                   <div className="text-center space-y-4">
                     <img
                       src="/cozyloops-trademark.png"
-                      alt="CozyLoops trademark logo with crochet flowers, yarn, and needles"
+                      alt="cozy.loopsss_ trademark logo with crochet flowers, yarn, and needles"
                       className="mx-auto w-[82%] max-w-[420px] animate-float object-contain"
                     />
                     <p className="font-cursive text-2xl text-primary-rosePink">Handmade with â¤ï¸</p>

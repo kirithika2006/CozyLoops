@@ -66,7 +66,7 @@ const Settings = () => {
           <div className="space-y-3">
             <div>
               <p className="text-sm text-secondary-dark/60">Username</p>
-              <p className="font-semibold text-secondary-dark">{adminUser?.username || 'CozyLoops21'}</p>
+              <p className="font-semibold text-secondary-dark">{adminUser?.username || 'cozy.loopsss_'}</p>
             </div>
             <div>
               <p className="text-sm text-secondary-dark/60">Role</p>
@@ -178,11 +178,11 @@ const Settings = () => {
       {/* Additional Settings */}
       <div className="card-premium p-6">
         <h3 className="font-display text-lg font-bold text-secondary-dark mb-4">
-          About CozyLoops
+          About cozy.loopsss_
         </h3>
         <div className="space-y-2 text-sm text-secondary-dark/70">
           <p>Version: 1.0.0</p>
-          <p>Theme: CozyLoops Premium</p>
+          <p>Theme: cozy.loopsss_ Premium</p>
           <p>Admin Panel: v1.0.0</p>
         </div>
       </div>

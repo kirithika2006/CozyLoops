@@ -53,8 +53,8 @@ const ContactPage = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us - CozyLoops</title>
-        <meta name="description" content="Get in touch with CozyLoops for custom crochet orders, inquiries, or just to say hello!" />
+        <title>Contact Us - cozy.loopsss_</title>
+        <meta name="description" content="Get in touch with cozy.loopsss_ for custom crochet orders, inquiries, or just to say hello!" />
       </Helmet>
 
       <motion.div

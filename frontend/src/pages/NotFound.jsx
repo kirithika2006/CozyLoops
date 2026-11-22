@@ -9,7 +9,7 @@ const NotFound = () => {
   return (
     <>
       <Helmet>
-        <title>404 - Page Not Found | CozyLoops</title>
+        <title>404 - Page Not Found | cozy.loopsss_</title>
       </Helmet>
 
       <div className="min-h-[70vh] flex items-center justify-center px-4">

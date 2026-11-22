@@ -15,7 +15,6 @@ import {
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import AdminLoginModal from '../auth/AdminLoginModal';
-import logo from '../../assets/images/logo/cozyloops-logo.svg';
 import { OWNER_WHATSAPP_NUMBER } from '../../utils/constants';
 
 const Navbar = () => {
@@ -65,10 +64,10 @@ const Navbar = () => {
               whileTap={{ scale: 0.95 }}
             >
               <Link to="/" className="flex items-center space-x-2">
-                <img src={logo} alt="CozyLoops handmade crochet" className="h-12 w-auto max-w-[165px] object-contain md:h-14" />
+                <img src="/cozyloops-trademark.png" alt="" className="h-10 w-10 rounded-full object-cover md:h-12 md:w-12" />
                 <span className="hidden">🧶</span>
-                <span className="sr-only">
-                  CozyLoops
+                <span className="font-display text-lg font-bold text-gradient sm:text-xl">
+                  cozy.loopsss_
                 </span>
               </Link>
             </motion.div>

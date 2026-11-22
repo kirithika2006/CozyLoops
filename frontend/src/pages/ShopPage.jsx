@@ -122,7 +122,7 @@ const ShopPage = () => {
   return (
     <>
       <Helmet>
-        <title>Shop - CozyLoops</title>
+        <title>Shop - cozy.loopsss_</title>
         <meta name="description" content="Shop our collection of handmade crochet creations" />
       </Helmet>
 

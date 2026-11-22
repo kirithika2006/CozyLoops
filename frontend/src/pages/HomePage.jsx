@@ -14,7 +14,7 @@ const HomePage = () => {
   return (
     <>
       <Helmet>
-        <title>CozyLoops - Handmade Crochet Creations</title>
+        <title>cozy.loopsss_ - Handmade Crochet Creations</title>
         <meta 
           name="description" 
           content="Handmade crochet creations crafted with care. Custom crochet flowers, bouquets, keychains, phone charms, plushies and personalized gifts." 

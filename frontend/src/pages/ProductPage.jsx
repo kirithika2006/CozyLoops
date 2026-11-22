@@ -87,7 +87,7 @@ const ProductPage = () => {
   return (
     <>
       <Helmet>
-        <title>{`${product.name} - CozyLoops`}</title>
+        <title>{`${product.name} - cozy.loopsss_`}</title>
         <meta name="description" content={product.description} />
       </Helmet>
 

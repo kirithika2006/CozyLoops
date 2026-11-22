@@ -28,7 +28,7 @@ const FAQ = () => {
     },
     {
       question: 'What is your return policy?',
-      answer: 'We want you to love your CozyLoops creation! If you\'re not satisfied, please contact us within 7 days of delivery. Each item is handmade with care, so we handle returns on a case-by-case basis.'
+      answer: 'We want you to love your cozy.loopsss_ creation! If you\'re not satisfied, please contact us within 7 days of delivery. Each item is handmade with care, so we handle returns on a case-by-case basis.'
     },
   ];
 
@@ -43,7 +43,7 @@ const FAQ = () => {
           className="text-center mb-12"
         >
           <h2 className="section-title mb-2">Frequently Asked Questions</h2>
-          <p className="text-secondary-dark/60">Everything you need to know about CozyLoops</p>
+          <p className="text-secondary-dark/60">Everything you need to know about cozy.loopsss_</p>
         </motion.div>
 
         <div className="space-y-4">

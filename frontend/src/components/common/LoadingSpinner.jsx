@@ -23,7 +23,7 @@ const LoadingSpinner = ({ size = 'md', fullScreen = false }) => {
         <div className="absolute inset-0 rounded-full border-4 border-primary-rosePink border-t-transparent" />
       </motion.div>
       <div className="flex gap-1">
-        {['C', 'o', 'z', 'y', 'L', 'o', 'o', 'p', 's'].map((letter, index) => (
+        {Array.from('cozy.loopsss_').map((letter, index) => (
           <motion.span
             key={index}
             className="text-primary-rosePink font-display text-lg"

@@ -45,8 +45,8 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-3xl">🧶</span>
-              <span className="font-display text-2xl font-bold text-gradient">CozyLoops</span>
+              <img src="/cozyloops-trademark.png" alt="" className="h-10 w-10 rounded-full object-cover" />
+              <span className="font-display text-2xl font-bold text-gradient">cozy.loopsss_</span>
             </Link>
             <p className="text-secondary-dark/70 leading-relaxed">
               Handmade crochet creations crafted with care. Each piece is made with love and attention to detail.
@@ -111,7 +111,7 @@ const Footer = () => {
         <div className="border-t border-primary-babyPink/30 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-secondary-dark/60 text-sm">
-              © {new Date().getFullYear()} CozyLoops. Made with{' '}
+              © {new Date().getFullYear()} cozy.loopsss_. Made with{' '}
               <FaHeart className="inline text-primary-rosePink animate-pulse" /> in India
             </p>
             <div className="flex items-center space-x-6 text-sm">

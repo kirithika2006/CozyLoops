@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { FaHeart, FaShoppingCart, FaStar, FaStarHalfAlt, FaShare, FaCopy, FaCheck } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -13,6 +13,7 @@ const ProductDetails = ({ product }) => {
   const [isCopied, setIsCopied] = useState(false);
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const navigate = useNavigate();
 
   const {
     _id,
@@ -45,7 +46,7 @@ const ProductDetails = ({ product }) => {
 
   const handleQuantityChange = (delta) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && (madeToOrder || newQuantity <= stock)) {
+    if (newQuantity >= 1 && newQuantity <= 100 && (madeToOrder || newQuantity <= stock)) {
       setQuantity(newQuantity);
     }
   };
@@ -64,11 +65,9 @@ const ProductDetails = ({ product }) => {
       toast.error('Out of stock');
       return;
     }
-    // Add to cart first, then navigate to contact
-    addToCart(product, quantity);
-    setTimeout(() => {
-      window.location.href = '/checkout';
-    }, 500);
+    navigate(`/checkout?productId=${encodeURIComponent(_id)}&quantity=${quantity}`, {
+      state: { buyNowProduct: product }
+    });
   };
 
   const handleShare = async () => {
@@ -77,7 +76,7 @@ const ProductDetails = ({ product }) => {
       try {
         await navigator.share({
           title: name,
-          text: `Check out ${name} on CozyLoops!`,
+          text: `Check out ${name} on cozy.loopsss_!`,
           url: url,
         });
       } catch (error) {
