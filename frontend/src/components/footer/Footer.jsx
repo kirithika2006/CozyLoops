@@ -10,6 +10,7 @@ import {
   FaHeart,
   FaArrowRight
 } from 'react-icons/fa';
+import { OWNER_WHATSAPP_NUMBER } from '../../utils/constants';
 
 const Footer = () => {
   const quickLinks = [
@@ -30,7 +31,7 @@ const Footer = () => {
 
   const socialLinks = [
     { icon: FaInstagram, url: 'https://instagram.com/cozy.loopsss_', label: 'Instagram' },
-    { icon: FaWhatsapp, url: 'https://wa.me/919445084921', label: 'WhatsApp' },
+    { icon: FaWhatsapp, url: `https://wa.me/${OWNER_WHATSAPP_NUMBER}`, label: 'WhatsApp' },
     { icon: FaEnvelope, url: 'mailto:cozyloopsss21@gmail.com', label: 'Email' },
     { icon: FaFacebook, url: '#', label: 'Facebook' },
     { icon: FaPinterest, url: '#', label: 'Pinterest' },

@@ -3,6 +3,10 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const dotenv = require('dotenv');
+
+// Load settings before importing controllers that read environment defaults.
+dotenv.config();
+
 const { limiter } = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/AppError');
@@ -14,11 +18,12 @@ const productRoutes = require('./routes/productRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
-
-// Load env
-dotenv.config();
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
+
+// Render terminates TLS at its trusted proxy; use the originating client IP for throttling.
+app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet({
@@ -65,6 +70,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/orders', orderRoutes);
 
 // 404 handler
 app.all('*', (req, res, next) => {

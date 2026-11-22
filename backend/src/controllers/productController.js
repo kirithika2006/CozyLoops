@@ -4,6 +4,7 @@ const cloudinary = require('../config/cloudinary');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const Analytics = require('../models/Analytics');
+const InventoryMovement = require('../models/InventoryMovement');
 
 // @desc    Create product
 // @route   POST /api/products
@@ -31,11 +32,14 @@ const createProduct = catchAsync(async (req, res, next) => {
     tags,
     isFeatured,
     isTrending,
-    isNewArrival
+    isNewArrival,
+    fulfillmentType,
+    lowStockThreshold,
+    preparationTime
   } = req.body;
 
   // Validate required fields
-  if (!name || !description || !category || !price || !stock || !sku || !material || !weight) {
+  if (!name || !description || !category || price === undefined || price === '' || stock === undefined || stock === '' || !sku || !material || weight === undefined || weight === '') {
     return next(new AppError('Please fill in all required fields', 400));
   }
 
@@ -91,6 +95,9 @@ const createProduct = catchAsync(async (req, res, next) => {
     price: parseFloat(price),
     discount: parseFloat(discount) || 0,
     stock: parseInt(stock),
+    fulfillmentType: fulfillmentType || 'READY_TO_SHIP',
+    lowStockThreshold: lowStockThreshold === undefined ? 3 : parseInt(lowStockThreshold, 10),
+    preparationTime: preparationTime || '',
     sku: sku.trim(),
     material: material.trim(),
     weight: parseFloat(weight),
@@ -193,7 +200,7 @@ const updateProduct = catchAsync(async (req, res, next) => {
   });
 
   // Parse number fields
-  ['price', 'discount', 'stock', 'weight'].forEach(field => {
+  ['price', 'discount', 'stock', 'weight', 'lowStockThreshold'].forEach(field => {
     if (updateData[field] !== undefined) {
       updateData[field] = parseFloat(updateData[field]);
     }
@@ -204,6 +211,20 @@ const updateProduct = catchAsync(async (req, res, next) => {
     updateData,
     { new: true, runValidators: true }
   ).populate('category', 'name');
+
+  if (updateData.stock !== undefined && Number(updateData.stock) !== Number(product.stock)) {
+    await InventoryMovement.create({
+      productId: product._id,
+      sku: updatedProduct.sku,
+      reason: 'admin_adjustment',
+      quantityChange: Number(updatedProduct.stock) - Number(product.stock),
+      stockBefore: Number(product.stock),
+      stockAfter: Number(updatedProduct.stock),
+      adminId: req.admin?._id || null,
+      adminName: req.admin?.username || '',
+      note: 'Stock adjusted from product management'
+    });
+  }
 
   console.log('✅ Product updated successfully:', updatedProduct._id);
 

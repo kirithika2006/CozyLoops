@@ -45,6 +45,9 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Stock is required'],
     min: [0, 'Stock cannot be negative']
   },
+  fulfillmentType: { type: String, enum: ['READY_TO_SHIP', 'MADE_TO_ORDER'], default: 'READY_TO_SHIP' },
+  lowStockThreshold: { type: Number, min: 0, default: 3 },
+  preparationTime: { type: String, trim: true, maxlength: 100, default: '' },
   sku: {
     type: String,
     required: [true, 'SKU is required'],

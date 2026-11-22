@@ -1,0 +1,8 @@
+﻿import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { orderService } from '../services/orderService';
+export default function MyOrdersPage() {
+ const [orders,setOrders]=useState([]),[error,setError]=useState('');
+ useEffect(()=>{let mounted=true;const records=JSON.parse(localStorage.getItem('cozyloops_orders')||'[]');Promise.all(records.map(async r=>{try{return (await orderService.track(r.orderId,r.token)).order}catch{return null}})).then(rows=>{if(mounted)setOrders(rows.filter(Boolean))}).catch(()=>{if(mounted)setError('Unable to load orders right now.')});return()=>{mounted=false}},[]);
+ return <main className="max-w-5xl mx-auto px-4 py-10"><h1 className="font-display text-3xl font-bold mb-6">My Orders</h1>{error&&<p role="alert" className="text-red-600">{error}</p>}{!orders.length?<div className="card-premium p-8 text-center"><p>No saved orders found on this device.</p><p className="text-sm text-gray-500 mt-2">Order tracking uses a secure token saved locally when you place an order.</p><Link to="/shop" className="text-pink-600 mt-4 inline-block">Browse the shop</Link></div>:<div className="space-y-4">{orders.map(o=><article key={o._id} className="card-premium p-5"><div className="flex flex-wrap justify-between gap-3"><div><b>{o.orderId}</b><p className="text-sm text-gray-500">{new Date(o.createdAt).toLocaleString()}</p></div><div className="text-right"><b>₹{o.total.toFixed(2)}</b><p>{o.status} · {o.paymentStatus}</p></div></div><div className="mt-3">{o.items.map(i=><p key={i.productId}>{i.name} × {i.quantity}</p>)}</div><p className="text-sm mt-3">Deliver to: {o.customer.address}, {o.customer.city}, {o.customer.state} {o.customer.pinCode}</p></article>)}</div>}</main>
+}

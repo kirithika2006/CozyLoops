@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFB6C1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF69B4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <text x="0" y="45" font-family="'Playfair Display', serif" font-size="42" font-weight="bold" fill="url(#grad)">CozyLoops</text>
+  <text x="0" y="58" font-family="'Inter', sans-serif" font-size="10" fill="#FF69B4" opacity="0.6">Handmade Crochet Creations</text>
+</svg>

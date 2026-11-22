@@ -12,7 +12,7 @@ const CartPage = () => {
 
   const handleCheckout = () => {
     if (cartItems.length > 0) {
-      navigate('/contact');
+      navigate('/checkout');
     }
   };
 

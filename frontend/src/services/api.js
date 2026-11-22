@@ -27,7 +27,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isOwnerLoginRequest = error.config?.url?.includes('/admin/owner/');
+    if (error.response?.status === 401 && !isOwnerLoginRequest) {
       // Clear admin session if token expired
       localStorage.removeItem('cozyloops_admin_token');
       localStorage.removeItem('cozyloops_admin_user');

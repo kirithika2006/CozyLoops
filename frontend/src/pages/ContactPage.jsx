@@ -8,15 +8,16 @@ import {
   FaClock
 } from 'react-icons/fa';
 import { Helmet } from 'react-helmet-async';
+import { OWNER_WHATSAPP_NUMBER, OWNER_PHONE_DISPLAY } from '../utils/constants';
 
 const ContactPage = () => {
   const contactInfo = [
     {
       icon: FaWhatsapp,
       label: 'WhatsApp',
-      value: '9445084921',
+      value: OWNER_PHONE_DISPLAY,
       action: 'Chat Now',
-      href: 'https://wa.me/919445084921',
+      href: `https://wa.me/${OWNER_WHATSAPP_NUMBER}`,
       color: 'text-green-500',
       bg: 'bg-green-50'
     },

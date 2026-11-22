@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "CozyLoops E-commerce Backend API",
   "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
@@ -19,7 +22,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
     "multer": "^1.4.5-lts.1",
-    "multer-storage-cloudinary": "^4.0.0"
+    "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^10.6.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

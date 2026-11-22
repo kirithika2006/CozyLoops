@@ -57,8 +57,18 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = (product, quantity = 1) => {
+    const madeToOrder = product.fulfillmentType === 'MADE_TO_ORDER';
+    if (!product.isAvailable || (!madeToOrder && Number(product.stock) < 1)) {
+      toast.error('This product is currently unavailable');
+      return;
+    }
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item._id === product._id);
+      const nextQuantity = (existingItem?.quantity || 0) + quantity;
+      if (!madeToOrder && nextQuantity > Number(product.stock)) {
+        toast.error(`Only ${product.stock} unit(s) are available`);
+        return prevItems;
+      }
       
       if (existingItem) {
         // Update quantity if item exists
@@ -78,6 +88,10 @@ export const CartProvider = ({ children }) => {
           discount: product.discount || 0,
           images: product.images || [],
           stock: product.stock,
+          sku: product.sku,
+          fulfillmentType: product.fulfillmentType || 'READY_TO_SHIP',
+          preparationTime: product.preparationTime || '',
+          isAvailable: product.isAvailable !== false,
           material: product.material,
           quantity: quantity
         };
@@ -104,6 +118,12 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
+    const item = cartItems.find(cartItem => cartItem._id === productId);
+    if (quantity > 100 || (item?.fulfillmentType !== 'MADE_TO_ORDER' && item && quantity > Number(item.stock))) {
+      toast.error(item?.fulfillmentType === 'MADE_TO_ORDER' ? 'Maximum quantity is 100 per item' : `Only ${item?.stock || 0} unit(s) are available`);
+      return;
+    }
+
     setCartItems(prevItems =>
       prevItems.map(item =>
         item._id === productId
@@ -116,6 +136,14 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => {
     setCartItems([]);
     toast.success('Cart cleared');
+  };
+
+  const removePurchasedItems = (purchasedItems) => {
+    const quantities = new Map(purchasedItems.map(item => [String(item._id || item.productId), item.quantity]));
+    setCartItems(prev => prev.flatMap(item => {
+      const remaining = item.quantity - (quantities.get(String(item._id)) || 0);
+      return remaining > 0 ? [{ ...item, quantity: remaining }] : [];
+    }));
   };
 
   const getItemCount = () => cartCount;
@@ -135,6 +163,7 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    removePurchasedItems,
     getItemCount,
     getTotalPrice,
     isInCart,

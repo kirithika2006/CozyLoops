@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaArrowRight } from 'react-icons/fa';
@@ -7,12 +7,12 @@ import Button from '../common/Button';
 const Hero = () => {
   // Floating elements positions
   const floatingElements = [
-    { icon: '🌸', x: '10%', y: '20%', delay: 0 },
-    { icon: '🧶', x: '85%', y: '15%', delay: 1 },
-    { icon: '🌺', x: '5%', y: '70%', delay: 2 },
-    { icon: '🧵', x: '90%', y: '75%', delay: 0.5 },
-    { icon: '💐', x: '50%', y: '10%', delay: 1.5 },
-    { icon: '🎀', x: '45%', y: '85%', delay: 2.5 },
+    { icon: 'ðŸŒ¸', x: '10%', y: '20%', delay: 0 },
+    { icon: 'ðŸ§¶', x: '85%', y: '15%', delay: 1 },
+    { icon: 'ðŸŒº', x: '5%', y: '70%', delay: 2 },
+    { icon: 'ðŸ§µ', x: '90%', y: '75%', delay: 0.5 },
+    { icon: 'ðŸ’', x: '50%', y: '10%', delay: 1.5 },
+    { icon: 'ðŸŽ€', x: '45%', y: '85%', delay: 2.5 },
   ];
 
   const quotes = [
@@ -69,7 +69,7 @@ const Hero = () => {
               className="inline-block px-4 py-2 bg-primary-babyPink/20 rounded-full"
             >
               <span className="text-primary-rosePink font-medium text-sm">
-                ✨ Handmade with Love
+                âœ¨ Handmade with Love
               </span>
             </motion.div>
 
@@ -152,7 +152,7 @@ const Hero = () => {
                 <p className="text-sm text-secondary-dark/60">Unique Products</p>
               </div>
               <div>
-                <p className="font-display text-2xl font-bold text-secondary-dark">4.9⭐</p>
+                <p className="font-display text-2xl font-bold text-secondary-dark">4.9â­</p>
                 <p className="text-sm text-secondary-dark/60">Average Rating</p>
               </div>
             </motion.div>
@@ -170,8 +170,12 @@ const Hero = () => {
               <div className="relative aspect-square rounded-3xl overflow-hidden shadow-premium bg-gradient-to-br from-primary-babyPink/30 to-primary-rosePink/10">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center space-y-4">
-                    <div className="text-8xl md:text-9xl animate-float">🧶</div>
-                    <p className="font-cursive text-2xl text-primary-rosePink">Handmade with ❤️</p>
+                    <img
+                      src="/cozyloops-trademark.png"
+                      alt="CozyLoops trademark logo with crochet flowers, yarn, and needles"
+                      className="mx-auto w-[82%] max-w-[420px] animate-float object-contain"
+                    />
+                    <p className="font-cursive text-2xl text-primary-rosePink">Handmade with â¤ï¸</p>
                   </div>
                 </div>
                 
@@ -187,7 +191,7 @@ const Hero = () => {
                 transition={{ duration: 3, repeat: Infinity }}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-2xl">⭐</span>
+                  <span className="text-2xl">â­</span>
                   <div>
                     <p className="font-bold text-sm">Handmade</p>
                     <p className="text-xs text-secondary-dark/60">With love</p>
@@ -201,7 +205,7 @@ const Hero = () => {
                 transition={{ duration: 3.5, repeat: Infinity, delay: 1 }}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-2xl">🎁</span>
+                  <span className="text-2xl">ðŸŽ</span>
                   <div>
                     <p className="font-bold text-sm">Custom</p>
                     <p className="text-xs text-secondary-dark/60">Made for you</p>
@@ -217,3 +221,4 @@ const Hero = () => {
 };
 
 export default Hero;
+

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
+import { authService } from '../services/authService';
 
 const AdminContext = createContext();
 
@@ -40,12 +40,11 @@ export const AdminProvider = ({ children }) => {
     checkAdminSession();
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, otp) => {
     try {
-      const response = await axios.post('/api/admin/login', { username, password });
-      
-      if (response.data.success) {
-        const { token, admin } = response.data;
+      const { token, admin, success } = await authService.verifyOwnerOtp(email, otp);
+
+      if (success) {
         
         // Store in localStorage
         localStorage.setItem('cozyloops_admin_token', token);
@@ -55,13 +54,11 @@ export const AdminProvider = ({ children }) => {
         setAdminUser(admin);
         setIsAdmin(true);
         
-        toast.success('Welcome back, Admin!');
         return { success: true };
       }
       return { success: false, message: 'Login failed' };
     } catch (error) {
-      console.error('Login error:', error);
-      const message = error.response?.data?.message || 'Invalid username or password';
+      const message = error.response?.data?.message || 'Could not verify the code. Please try again.';
       toast.error(message);
       return { success: false, message };
     }
@@ -78,16 +75,9 @@ export const AdminProvider = ({ children }) => {
 
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      const response = await axios.put('/api/admin/change-password', {
-        currentPassword,
-        newPassword
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await authService.changePassword(currentPassword, newPassword);
 
-      if (response.data.success) {
+      if (response.success) {
         toast.success('Password changed successfully');
         return { success: true };
       }

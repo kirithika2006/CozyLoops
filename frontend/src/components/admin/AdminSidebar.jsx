@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -17,11 +17,22 @@ import {
   FaTimes
 } from 'react-icons/fa';
 import { useAdmin } from '../../context/AdminContext';
+import logo from '../../assets/images/logo/cozyloops-logo.svg';
+import { orderService } from '../../services/orderService';
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
   const { logout } = useAdmin();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [newOrders, setNewOrders] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    const refresh = () => orderService.summary().then(result => { if (active) setNewOrders(result.summary?.newOrders || 0); }).catch(() => {});
+    refresh();
+    const timer = setInterval(refresh, 30000);
+    return () => { active = false; clearInterval(timer); };
+  }, []);
 
   const menuItems = [
     { path: '/admin', icon: FaHome, label: 'Home' },
@@ -61,10 +72,11 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       >
         {/* Logo & Toggle */}
         <div className="flex items-center justify-between h-20 px-4 border-b border-primary-babyPink/20">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🧶</span>
+          <div className="flex min-w-0 items-center gap-3">
+            <img src={logo} alt="CozyLoops" className={`${isOpen ? 'h-12 max-w-[155px]' : 'h-9 max-w-[40px]'} w-auto object-contain`} />
+            <span className="hidden">🧶</span>
             {isOpen && (
-              <span className="font-display text-xl font-bold text-gradient">
+              <span className="sr-only">
                 CozyLoops
               </span>
             )}
@@ -94,6 +106,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
             >
               <item.icon className={`text-xl ${!isOpen && 'text-2xl'}`} />
               {isOpen && <span className="font-medium">{item.label}</span>}
+              {item.label === 'Orders' && newOrders > 0 && <span className="ml-auto rounded-full bg-red-500 text-white text-xs min-w-5 h-5 px-1 flex items-center justify-center">{newOrders > 99 ? '99+' : newOrders}</span>}
             </NavLink>
           ))}
         </nav>

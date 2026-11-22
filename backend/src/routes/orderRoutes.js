@@ -1,0 +1,13 @@
+﻿const router = require('express').Router();
+const { protect, isAdmin } = require('../middleware/auth');
+const { orderCreateLimiter, orderTrackLimiter } = require('../middleware/rateLimiter');
+const c = require('../controllers/orderController');
+router.post('/', orderCreateLimiter, c.createOrder);
+router.get('/:orderId/track', orderTrackLimiter, c.trackOrder);
+router.get('/admin/summary', protect, isAdmin, c.orderSummary);
+router.get('/admin', protect, isAdmin, c.listOrders);
+router.get('/admin/:id', protect, isAdmin, c.getOrder);
+router.patch('/admin/:id/status', protect, isAdmin, c.updateStatus);
+router.patch('/admin/:id/payment', protect, isAdmin, c.updatePayment);
+router.post('/admin/:id/notes', protect, isAdmin, c.addNote);
+module.exports = router;

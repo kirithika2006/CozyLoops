@@ -2,7 +2,9 @@ const rateLimit = require('express-rate-limit');
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  // Public storefront pages load several API resources at once. Keep an
+  // overall abuse ceiling without exhausting it during normal browsing.
+  max: 300,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -24,4 +26,23 @@ const uploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = { limiter, authLimiter, uploadLimiter };
+const ownerOtpRequestLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: 'Too many owner login code requests. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const ownerOtpVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many verification attempts. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const orderCreateLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: 'Too many order attempts. Please try again later.', standardHeaders: true, legacyHeaders: false });
+const orderTrackLimiter = rateLimit({ windowMs: 15 *  60 * 1000, max: 60, message: 'Too many tracking requests. Please try again later.', standardHeaders: true, legacyHeaders: false });
+
+module.exports = { limiter, authLimiter, uploadLimiter, ownerOtpRequestLimiter, ownerOtpVerifyLimiter, orderCreateLimiter, orderTrackLimiter };

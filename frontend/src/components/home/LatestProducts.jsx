@@ -12,19 +12,30 @@ const LatestProducts = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     const fetchLatestProducts = async () => {
       try {
-        setLoading(true);
         const response = await productService.getLatestProducts(8);
-        setProducts(response.products || []);
+        if (active) setProducts(response.products || []);
       } catch (error) {
         console.error('Error fetching latest products:', error);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchLatestProducts();
+    // Refresh newest admin-created products while the home page is open.
+    const refreshTimer = window.setInterval(fetchLatestProducts, 60000);
+    const refreshOnReturn = () => {
+      if (document.visibilityState === 'visible') fetchLatestProducts();
+    };
+    document.addEventListener('visibilitychange', refreshOnReturn);
+    return () => {
+      active = false;
+      window.clearInterval(refreshTimer);
+      document.removeEventListener('visibilitychange', refreshOnReturn);
+    };
   }, []);
 
   if (loading) {

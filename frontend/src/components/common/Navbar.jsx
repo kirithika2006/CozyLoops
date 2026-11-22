@@ -15,6 +15,8 @@ import {
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import AdminLoginModal from '../auth/AdminLoginModal';
+import logo from '../../assets/images/logo/cozyloops-logo.svg';
+import { OWNER_WHATSAPP_NUMBER } from '../../utils/constants';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +48,7 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Shop', path: '/shop' },
     { name: 'Contact', path: '/contact' },
+    { name: 'My Orders', path: '/my-orders' },
   ];
 
   return (
@@ -62,8 +65,9 @@ const Navbar = () => {
               whileTap={{ scale: 0.95 }}
             >
               <Link to="/" className="flex items-center space-x-2">
-                <span className="text-3xl">🧶</span>
-                <span className="font-display text-2xl font-bold text-gradient">
+                <img src={logo} alt="CozyLoops handmade crochet" className="h-12 w-auto max-w-[165px] object-contain md:h-14" />
+                <span className="hidden">🧶</span>
+                <span className="sr-only">
                   CozyLoops
                 </span>
               </Link>
@@ -122,9 +126,10 @@ const Navbar = () => {
               {/* Admin */}
               <button
                 onClick={() => setIsAdminModalOpen(true)}
-                className="p-2 hover:text-primary-rosePink transition-colors"
+                className="flex items-center gap-2 rounded-full border border-primary-babyPink/40 px-3 py-2 text-sm font-medium text-secondary-dark transition-colors hover:border-primary-rosePink hover:text-primary-rosePink"
               >
                 <FaUserCircle className="text-2xl" />
+                <span>Owner Login</span>
               </button>
             </div>
 
@@ -202,7 +207,7 @@ const Navbar = () => {
                     className="flex items-center space-x-2"
                   >
                     <FaUserCircle className="text-xl" />
-                    <span>Admin</span>
+                    <span>Owner Login</span>
                   </button>
                 </div>
 
@@ -211,7 +216,7 @@ const Navbar = () => {
                   <a href="https://instagram.com/cozy.loopsss_" target="_blank" rel="noopener noreferrer" className="hover:text-primary-rosePink transition-colors">
                     <FaInstagram className="text-xl" />
                   </a>
-                  <a href="https://wa.me/919445084921" target="_blank" rel="noopener noreferrer" className="hover:text-primary-rosePink transition-colors">
+                  <a href={`https://wa.me/${OWNER_WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary-rosePink transition-colors">
                     <FaWhatsapp className="text-xl" />
                   </a>
                   <a href="mailto:cozyloopsss21@gmail.com" className="hover:text-primary-rosePink transition-colors">

@@ -1,9 +1,13 @@
 import api from './api';
 
 export const authService = {
-  // Admin login
-  login: async (username, password) => {
-    const response = await api.post('/admin/login', { username, password });
+  requestOwnerOtp: async (email) => {
+    const response = await api.post('/admin/owner/request-otp', { email });
+    return response.data;
+  },
+
+  verifyOwnerOtp: async (email, otp) => {
+    const response = await api.post('/admin/owner/verify-otp', { email, otp });
     return response.data;
   },
 

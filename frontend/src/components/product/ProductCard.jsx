@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaHeart, FaShoppingCart, FaStar, FaEye } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
@@ -11,6 +11,7 @@ const ProductCard = ({ product }) => {
   const [imageIndex, setImageIndex] = useState(0);
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const navigate = useNavigate();
 
   const {
     _id,
@@ -35,7 +36,7 @@ const ProductCard = ({ product }) => {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (stock > 0) {
+    if (product.fulfillmentType === 'MADE_TO_ORDER' || stock > 0) {
       addToCart(product);
     } else {
       toast.error('This product is out of stock');
@@ -48,6 +49,12 @@ const ProductCard = ({ product }) => {
     toggleWishlist(product);
   };
 
+  const handleViewDetails = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/product/${_id}`);
+  };
+
   return (
     <motion.div
       className="card-premium group relative overflow-hidden"
@@ -58,12 +65,9 @@ const ProductCard = ({ product }) => {
       }}
       whileHover={{ y: -8 }}
     >
-      {/* Remove the outer Link and wrap only the image in Link */}
       <div className="block">
-        {/* Image Container - Link only wraps the image */}
-        <Link to={`/product/${_id}`} className="block">
-          <div className="relative aspect-square overflow-hidden bg-primary-lightPink/20">
-            {/* Main Image */}
+        <div className="relative aspect-square overflow-hidden bg-primary-lightPink/20">
+          <Link to={`/product/${_id}`} aria-label={`View ${name}`} className="block h-full w-full">
             <motion.img
               src={images && images.length > 0 ? images[imageIndex].url : 'https://via.placeholder.com/400x400?text=No+Image'}
               alt={name}
@@ -73,26 +77,26 @@ const ProductCard = ({ product }) => {
               }}
               loading="lazy"
             />
+          </Link>
 
-            {/* Multiple Image Indicators */}
-            {hasMultipleImages && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5">
-                {images.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setImageIndex(index);
-                    }}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === imageIndex 
-                        ? 'bg-primary-rosePink w-4' 
-                        : 'bg-white/60 hover:bg-white/80'
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
+          {/* Multiple Image Indicators */}
+          {hasMultipleImages && (
+            <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 space-x-1.5">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  aria-label={`Show image ${index + 1} of ${images.length}`}
+                  onClick={() => setImageIndex(index)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                    index === imageIndex
+                      ? 'bg-primary-rosePink w-4'
+                      : 'bg-white/60 hover:bg-white/80'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2">
@@ -116,7 +120,7 @@ const ProductCard = ({ product }) => {
                   🔥 Trending
                 </span>
               )}
-              {!isAvailable && (
+              {(!isAvailable || (product.fulfillmentType !== 'MADE_TO_ORDER' && stock <= 0)) && (
                 <span className="px-3 py-1 bg-gray-500 text-white text-xs font-semibold rounded-full">
                   Out of Stock
                 </span>
@@ -124,8 +128,8 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Quick Actions - Visible on Hover */}
-            <motion.div
-              className="absolute top-3 right-3 flex flex-col gap-2"
+          <motion.div
+              className="absolute right-3 top-3 z-10 flex flex-col gap-2"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : 20 }}
               transition={{ duration: 0.3 }}
@@ -136,33 +140,33 @@ const ProductCard = ({ product }) => {
               >
                 <FaHeart className={`text-lg ${isWishlisted ? 'text-primary-rosePink' : 'text-gray-400'}`} />
               </button>
-              <Link
-                to={`/product/${_id}`}
+              <button
+                type="button"
+                aria-label={`View ${name} details`}
+                onClick={handleViewDetails}
                 className="p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-soft hover:shadow-premium transition-all duration-300 hover:scale-110"
-                onClick={(e) => e.stopPropagation()}
               >
                 <FaEye className="text-lg text-gray-600" />
-              </Link>
-            </motion.div>
+              </button>
+          </motion.div>
 
             {/* Add to Cart Button - Visible on Hover */}
-            <motion.div
-              className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent"
+          <motion.div
+              className="absolute bottom-0 left-0 right-0 z-10 p-4 bg-gradient-to-t from-black/60 to-transparent"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
               transition={{ duration: 0.3 }}
             >
               <button
                 onClick={handleAddToCart}
-                disabled={!isAvailable || stock === 0}
+                disabled={!isAvailable || (product.fulfillmentType !== 'MADE_TO_ORDER' && stock === 0)}
                 className="w-full py-2.5 bg-white text-secondary-dark rounded-full font-semibold hover:bg-gradient-pink hover:text-white transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaShoppingCart className="text-sm" />
-                {stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                {product.fulfillmentType === 'MADE_TO_ORDER' ? 'Made to Order' : stock > 0 ? 'Add to Cart' : 'Out of Stock'}
               </button>
-            </motion.div>
-          </div>
-        </Link>
+          </motion.div>
+        </div>
 
         {/* Product Info - Not inside Link */}
         <div className="p-4 space-y-2">
@@ -204,10 +208,10 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* Stock Status */}
-          {stock > 0 && stock < 5 && (
+          {product.fulfillmentType === 'MADE_TO_ORDER' ? <p className="text-xs text-primary-rosePink">Made to order{product.preparationTime ? ` · ${product.preparationTime}` : ''}</p> : stock <= 0 ? <p className="text-xs text-red-500">Out of Stock</p> : stock <= (product.lowStockThreshold ?? 3) && (
             <p className="text-xs text-orange-500">Only {stock} left!</p>
           )}
-          {stock > 5 && (
+          {product.fulfillmentType !== 'MADE_TO_ORDER' && stock > (product.lowStockThreshold ?? 3) && (
             <p className="text-xs text-green-500">In Stock</p>
           )}
         </div>

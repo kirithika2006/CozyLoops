@@ -2,6 +2,157 @@ const Admin = require('../models/Admin');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { generateToken } = require('../utils/generateToken');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
+const OwnerOtp = require('../models/OwnerOtp');
+
+const OTP_EXPIRY_MINUTES = Math.max(1, Number(process.env.OTP_EXPIRY_MINUTES) || 5);
+const OTP_RESEND_COOLDOWN_SECONDS = Math.max(30, Number(process.env.OTP_RESEND_COOLDOWN_SECONDS) || 60);
+const MAX_OTP_ATTEMPTS = 5;
+
+const getOtpDigest = (email, otp) => {
+  const secret = process.env.OTP_HASH_SECRET || process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET or OTP_HASH_SECRET must be configured before owner login can be used.');
+  return crypto.createHmac('sha256', secret).update(`${email}:${otp}`).digest('hex');
+};
+
+const createMailTransport = () => {
+  const port = Number(process.env.SMTP_PORT || 587);
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    return null;
+  }
+
+  const secure = process.env.SMTP_SECURE === 'true' || port === 465;
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port,
+    secure,
+    requireTLS: !secure,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+  });
+};
+
+const requestOwnerOtp = catchAsync(async (req, res, next) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const ownerEmail = String(process.env.OWNER_EMAIL || '').trim().toLowerCase();
+
+  if (!ownerEmail || !email || email !== ownerEmail) {
+    return next(new AppError('This email is not authorized for owner login.', 403));
+  }
+
+  if (!process.env.JWT_SECRET) {
+    return next(new AppError('Owner login token signing is not configured.', 503));
+  }
+
+  const ownerAdminExists = await Admin.exists({ isAdmin: true });
+  if (!ownerAdminExists) {
+    return next(new AppError('No owner admin account is configured.', 503));
+  }
+
+  const transport = createMailTransport();
+  if (!transport) {
+    return next(new AppError('Owner email delivery is not configured. Please contact support.', 503));
+  }
+
+  const now = new Date();
+  const existing = await OwnerOtp.findOne({ email });
+  if (existing && now - existing.lastSentAt < OTP_RESEND_COOLDOWN_SECONDS * 1000) {
+    res.set('Retry-After', String(Math.ceil((OTP_RESEND_COOLDOWN_SECONDS * 1000 - (now - existing.lastSentAt)) / 1000)));
+    return next(new AppError('Please wait before requesting another code.', 429));
+  }
+
+  const otp = crypto.randomInt(0, 1000000).toString().padStart(6, '0');
+  const expiresAt = new Date(now.getTime() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+  // Persist the keyed OTP digest before sending. A failed delivery invalidates it below.
+  await OwnerOtp.findOneAndUpdate(
+    { email },
+    { email, otpHash: getOtpDigest(email, otp), expiresAt, attempts: 0, lastSentAt: now },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+
+  try {
+    await transport.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: ownerEmail,
+      subject: 'Your CozyLoops Owner Login Verification Code',
+      text: `Hello,\n\nYour CozyLoops owner login verification code is:\n\n${otp}\n\nThis code expires in ${OTP_EXPIRY_MINUTES} minutes.\n\nIf you did not request this login, please ignore this email.\n\nRegards,\nCozyLoops Team`
+    });
+  } catch (error) {
+    await OwnerOtp.deleteOne({ email, otpHash: getOtpDigest(email, otp) });
+    console.error('Owner OTP email delivery failed:', {
+      code: error.code,
+      responseCode: error.responseCode,
+      command: error.command
+    });
+    if (error.code === 'EAUTH' || error.responseCode === 535) {
+      return next(new AppError('Gmail rejected SMTP sign-in. Update SMTP_PASS with a valid Google App Password.', 502));
+    }
+    return next(new AppError('We could not send your verification code. Check the SMTP host, port, and TLS settings, then try again.', 502));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'A verification code has been sent to the authorized owner email.',
+    expiresIn: OTP_EXPIRY_MINUTES * 60,
+    resendAfter: OTP_RESEND_COOLDOWN_SECONDS
+  });
+});
+
+const verifyOwnerOtp = catchAsync(async (req, res, next) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const otp = String(req.body.otp || '').trim();
+  const ownerEmail = String(process.env.OWNER_EMAIL || '').trim().toLowerCase();
+
+  if (!ownerEmail || email !== ownerEmail || !/^\d{6}$/.test(otp)) {
+    return next(new AppError('Invalid or expired verification code.', 401));
+  }
+
+  if (!process.env.JWT_SECRET) {
+    return next(new AppError('Owner login token signing is not configured.', 503));
+  }
+
+  const challenge = await OwnerOtp.findOne({ email }).select('+otpHash');
+  if (!challenge || challenge.expiresAt <= new Date() || challenge.attempts >= MAX_OTP_ATTEMPTS) {
+    if (challenge) await OwnerOtp.deleteOne({ _id: challenge._id });
+    return next(new AppError('Invalid or expired verification code.', 401));
+  }
+
+  const submittedHash = Buffer.from(getOtpDigest(email, otp), 'hex');
+  const storedHash = Buffer.from(challenge.otpHash, 'hex');
+  if (submittedHash.length !== storedHash.length || !crypto.timingSafeEqual(submittedHash, storedHash)) {
+    const updated = await OwnerOtp.findOneAndUpdate(
+      { _id: challenge._id, attempts: { $lt: MAX_OTP_ATTEMPTS } },
+      { $inc: { attempts: 1 } },
+      { new: true }
+    );
+    if (updated && updated.attempts >= MAX_OTP_ATTEMPTS) await OwnerOtp.deleteOne({ _id: challenge._id });
+    return next(new AppError('Invalid or expired verification code.', 401));
+  }
+
+  // Atomic consume prevents the same OTP from minting multiple sessions.
+  const consumed = await OwnerOtp.findOneAndDelete({
+    _id: challenge._id,
+    otpHash: challenge.otpHash,
+    attempts: { $lt: MAX_OTP_ATTEMPTS },
+    expiresAt: { $gt: new Date() }
+  });
+  if (!consumed) return next(new AppError('Invalid or expired verification code.', 401));
+
+  const admin = await Admin.findOne({ isAdmin: true }).sort({ createdAt: 1 });
+  if (!admin) return next(new AppError('No owner admin account is configured.', 503));
+
+  admin.lastLogin = new Date();
+  await admin.save();
+  const token = generateToken(admin._id, true);
+
+  res.status(200).json({
+    success: true,
+    token,
+    admin: { id: admin._id, username: admin.username, isAdmin: true, lastLogin: admin.lastLogin }
+  });
+});
 
 // @desc    Login admin
 // @route   POST /api/admin/login
@@ -108,6 +259,8 @@ const initializeAdmin = catchAsync(async (req, res, next) => {
 });
 
 module.exports = {
+  requestOwnerOtp,
+  verifyOwnerOtp,
   login,
   changePassword,
   getProfile,

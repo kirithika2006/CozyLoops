@@ -40,32 +40,34 @@ const ProductDetails = ({ product }) => {
   const discountedPrice = discount > 0 ? price - (price * discount / 100) : price;
   const isWishlisted = isInWishlist(_id);
   const savings = discount > 0 ? price - discountedPrice : 0;
+  const madeToOrder = product.fulfillmentType === 'MADE_TO_ORDER';
+  const unavailable = !isAvailable || (!madeToOrder && stock <= 0);
 
   const handleQuantityChange = (delta) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && newQuantity <= stock) {
+    if (newQuantity >= 1 && (madeToOrder || newQuantity <= stock)) {
       setQuantity(newQuantity);
     }
   };
 
   const handleAddToCart = () => {
-    if (stock === 0) {
+    if (unavailable) {
       toast.error('Out of stock');
       return;
     }
-    addToCart({ ...product, quantity });
+    addToCart(product, quantity);
     toast.success(`Added ${quantity} item(s) to cart`);
   };
 
   const handleBuyNow = () => {
-    if (stock === 0) {
+    if (unavailable) {
       toast.error('Out of stock');
       return;
     }
     // Add to cart first, then navigate to contact
-    addToCart({ ...product, quantity });
+    addToCart(product, quantity);
     setTimeout(() => {
-      window.location.href = '/contact';
+      window.location.href = '/checkout';
     }, 500);
   };
 
@@ -146,9 +148,9 @@ const ProductDetails = ({ product }) => {
       {/* Stock Status */}
       <div className="flex items-center gap-2">
         <span className={`text-sm font-medium ${stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
-          {stock > 0 ? '✓ In Stock' : '✕ Out of Stock'}
+          {madeToOrder ? `Made to order${product.preparationTime ? ` · ${product.preparationTime}` : ''}` : stock > 0 ? '✓ In Stock' : '✕ Out of Stock'}
         </span>
-        {stock > 0 && stock < 10 && (
+        {!madeToOrder && stock > 0 && stock <= (product.lowStockThreshold ?? 3) && (
           <span className="text-xs text-orange-500">(Only {stock} left!)</span>
         )}
       </div>
@@ -229,14 +231,14 @@ const ProductDetails = ({ product }) => {
             </span>
             <button
               onClick={() => handleQuantityChange(1)}
-              disabled={quantity >= stock}
+              disabled={!madeToOrder && quantity >= stock}
               className="px-4 py-2 hover:bg-primary-babyPink/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               +
             </button>
           </div>
           <span className="text-sm text-secondary-dark/60">
-            {stock} available
+            {madeToOrder ? (product.preparationTime || 'Prepared to order') : `${stock} available`}
           </span>
         </div>
       </div>
@@ -247,7 +249,7 @@ const ProductDetails = ({ product }) => {
           variant="primary"
           size="lg"
           onClick={handleAddToCart}
-          disabled={!isAvailable || stock === 0}
+          disabled={unavailable}
           className="flex-1 min-w-[200px]"
         >
           <FaShoppingCart className="mr-2" />
@@ -257,7 +259,7 @@ const ProductDetails = ({ product }) => {
           variant="secondary"
           size="lg"
           onClick={handleBuyNow}
-          disabled={!isAvailable || stock === 0}
+          disabled={unavailable}
           className="flex-1 min-w-[200px]"
         >
           Buy Now

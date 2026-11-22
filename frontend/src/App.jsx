@@ -22,6 +22,9 @@ const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
+const MyOrdersPage = lazy(() => import('./pages/MyOrdersPage'));
 
 function App() {
   const location = useLocation();
@@ -51,6 +54,9 @@ function App() {
                     <Route path="/shop" element={<ShopPage />} />
                     <Route path="/product/:id" element={<ProductPage />} />
                     <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
+                    <Route path="/my-orders" element={<MyOrdersPage />} />
                     <Route path="/wishlist" element={<WishlistPage />} />
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/search" element={<SearchPage />} />

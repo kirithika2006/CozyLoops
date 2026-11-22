@@ -1,160 +1,24 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FaBox, FaCheck, FaClock, FaTruck, FaSearch } from 'react-icons/fa';
+﻿import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { orderService } from '../../services/orderService';
+import toast from 'react-hot-toast';
+const STATUSES=['Pending Payment','Confirmed','Processing','Ready for Dispatch','Dispatched','Completed','Cancelled'];
+const money=n=>`₹${Number(n||0).toFixed(2)}`;
+export default function Orders(){
+ const [orders,setOrders]=useState([]),[summary,setSummary]=useState({}),[loading,setLoading]=useState(true),[search,setSearch]=useState(''),[statusFilter,setStatusFilter]=useState(''),[selected,setSelected]=useState(null),[cancelReason,setCancelReason]=useState(''),[note,setNote]=useState(''),[sound,setSound]=useState(localStorage.getItem('cozyloops_order_sound')==='true');
+ const latestSeen=useRef(null);
+ const load=useCallback(async()=>{try{const [list,stats]=await Promise.all([orderService.list({search,status:statusFilter||undefined}),orderService.summary()]);setOrders(list.orders||[]);setSummary(stats.summary||{});const latest=stats.summary?.latest?.orderId;if(latestSeen.current&&latest&&latestSeen.current!==latest&&localStorage.getItem('cozyloops_order_sound')==='true'){try{const Ctx=window.AudioContext||window.webkitAudioContext;const ctx=new Ctx();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=880;gain.gain.value=.08;osc.start();osc.stop(ctx.currentTime+.18)}catch{}}latestSeen.current=latest||latestSeen.current;}catch(e){toast.error(e.response?.data?.message||'Unable to load orders. Please sign in again.')}finally{setLoading(false)}},[search,statusFilter]);
+ useEffect(()=>{load();const t=setInterval(load,30000);return()=>clearInterval(t)},[load]);
+ const act=async fn=>{try{await fn();toast.success('Order updated');await load();if(selected){const result=await orderService.get(selected._id);setSelected(result.order)}}catch(e){toast.error(e.response?.data?.message||'Could not update order')}};
+ const updateStatus=async status=>{if(status==='Cancelled'&&!cancelReason.trim()){toast.error('Enter a cancellation reason');return}await act(async()=>{await orderService.status(selected._id,status,cancelReason)});setCancelReason('')};
+ const addNote=async()=>{if(!note.trim())return;await act(()=>orderService.note(selected._id,note));setNote('')};
+ const toggleSound=e=>{setSound(e.target.checked);localStorage.setItem('cozyloops_order_sound',String(e.target.checked))};
+ const stats=[['Total Orders',summary.total],['New Orders',summary.newOrders],['Pending Payment',summary.pendingPayment],['Paid Orders',summary.paid],['Processing',summary.processing],['Dispatched',summary.dispatched],['Completed',summary.completed],['Cancelled',summary.cancelled]];
+ return <div className="space-y-6"><div className="flex flex-wrap justify-between gap-4 items-center"><div><h2 className="font-display text-2xl font-bold text-secondary-dark">Orders</h2><p className="text-secondary-dark/60">Live order management · refreshes every 30 seconds</p></div><label className="flex gap-2 items-center text-sm"><input type="checkbox" checked={sound} onChange={toggleSound}/>Enable order sound</label></div>
+ <div className="grid grid-cols-2 md:grid-cols-4 gap-3">{stats.map(([label,value])=><div key={label} className="card-premium p-4"><div className="text-sm text-gray-500">{label}</div><div className="text-2xl font-bold text-primary-rosePink">{value??0}</div></div>)}</div>
+ <div className="flex flex-wrap gap-3"><input className="input-field flex-1 min-w-[220px]" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search order, customer or phone"/><select className="select-field" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="">All statuses</option>{STATUSES.map(s=><option key={s}>{s}</option>)}</select><button onClick={load} className="btn-secondary">Refresh</button></div>
+ {loading?<p>Loading orders…</p>:!orders.length?<div className="card-premium p-10 text-center">No orders match this view.</div>:<div className="overflow-x-auto card-premium"><table className="min-w-full text-sm"><thead className="bg-pink-50"><tr>{['Order','Customer','Date','Products','Total','Payment','Status',''].map(x=><th key={x} className="text-left p-3">{x}</th>)}</tr></thead><tbody>{orders.map(o=><tr className="border-t" key={o._id}><td className="p-3 font-semibold">{o.orderId}</td><td className="p-3">{o.customer.fullName}<div className="text-gray-500">{o.customer.phone}</div></td><td className="p-3">{new Date(o.createdAt).toLocaleDateString()}</td><td className="p-3">{o.items.reduce((n,i)=>n+i.quantity,0)} item(s): {o.items.map(i=>i.name).join(', ')}</td><td className="p-3">{money(o.total)}</td><td className="p-3">{o.paymentStatus}</td><td className="p-3">{o.status}</td><td className="p-3"><button className="text-pink-600 font-semibold" onClick={()=>setSelected(o)}>View</button></td></tr>)}</tbody></table></div>}
+ {selected&&<div className="fixed inset-0 z-[70] bg-black/40 flex items-start justify-center overflow-y-auto p-4" onClick={()=>setSelected(null)}><section className="bg-white rounded-2xl p-6 max-w-3xl w-full my-8 space-y-4" onClick={e=>e.stopPropagation()}><div className="flex justify-between"><div><h3 className="text-2xl font-bold">{selected.orderId}</h3><p>{selected.status} · {selected.paymentStatus}</p></div><button onClick={()=>setSelected(null)} aria-label="Close">✕</button></div><div><b>{selected.customer.fullName}</b><p>{selected.customer.phone} · {selected.customer.email}</p><p>{selected.customer.address}, {selected.customer.city}, {selected.customer.state} {selected.customer.pinCode}</p>{selected.customerNotes&&<p>Customer note: {selected.customerNotes}</p>}</div><div className="border-y py-3">{selected.items.map(i=><div className="flex justify-between py-1" key={i.productId}><span>{i.name} · {i.sku} × {i.quantity}</span><span>{money(i.lineTotal)}</span></div>)}<b className="block text-right mt-2">Total {money(selected.total)}</b></div><div className="flex flex-wrap gap-3"><select className="select-field flex-1" value={selected.status} onChange={e=>updateStatus(e.target.value)}>{STATUSES.map(s=><option key={s}>{s}</option>)}</select>{selected.paymentStatus==='Unpaid'?<button className="btn-primary" onClick={()=>{if(window.confirm('Have you verified the UPI transfer in your bank or UPI app?'))act(()=>orderService.payment(selected._id,'Paid'))}}>Mark paid (verified)</button>:selected.paymentStatus==='Paid'?<button className="btn-secondary" onClick={()=>act(()=>orderService.payment(selected._id,'Refunded'))}>Mark refunded</button>:null}</div>{selected.status!=='Cancelled'&&selected.status!=='Completed'&&selected.status!=='Dispatched'&&<input className="input-field" placeholder="Cancellation reason (required to cancel)" value={cancelReason} onChange={e=>setCancelReason(e.target.value)}/>}<div><label className="font-medium">Internal notes</label><div className="max-h-28 overflow-y-auto text-sm">{(selected.adminNotes||[]).map((n,i)=><p key={i}>{n.text} <span className="text-gray-400">· {new Date(n.createdAt).toLocaleString()}</span></p>)}</div><div className="flex gap-2 mt-2"><input className="input-field flex-1" value={note} onChange={e=>setNote(e.target.value)} placeholder="Add internal note"/><button className="btn-secondary" onClick={addNote}>Add note</button></div></div><h4 className="font-semibold">Order history</h4><div className="max-h-32 overflow-y-auto text-sm">{[...selected.statusHistory].reverse().map((h,i)=><p key={i}>{h.action}: {h.fromStatus||''} → {h.toStatus||''} <span className="text-gray-400">{new Date(h.createdAt).toLocaleString()}</span></p>)}</div></section></div>}
+ </div>
+}
 
-const Orders = () => {
-  // Mock orders data - in production, this would come from an API
-  const [orders, setOrders] = useState([
-    {
-      id: 'ORD-001',
-      customer: 'Priya Sharma',
-      email: 'priya@email.com',
-      items: 3,
-      total: 2499,
-      status: 'delivered',
-      date: '2024-12-15',
-      address: '123 Main St, Mumbai, India'
-    },
-    {
-      id: 'ORD-002',
-      customer: 'Aisha Patel',
-      email: 'aisha@email.com',
-      items: 2,
-      total: 1599,
-      status: 'shipped',
-      date: '2024-12-14',
-      address: '456 Park Ave, Delhi, India'
-    },
-    {
-      id: 'ORD-003',
-      customer: 'Meera Reddy',
-      email: 'meera@email.com',
-      items: 5,
-      total: 4599,
-      status: 'processing',
-      date: '2024-12-13',
-      address: '789 Lake View, Bangalore, India'
-    }
-  ]);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-
-  const getStatusColor = (status) => {
-    const colors = {
-      processing: 'text-yellow-500 bg-yellow-50',
-      shipped: 'text-blue-500 bg-blue-50',
-      delivered: 'text-green-500 bg-green-50',
-      cancelled: 'text-red-500 bg-red-50'
-    };
-    return colors[status] || 'text-gray-500 bg-gray-50';
-  };
-
-  const getStatusIcon = (status) => {
-    const icons = {
-      processing: <FaClock />,
-      shipped: <FaTruck />,
-      delivered: <FaCheck />,
-      cancelled: <FaBox />
-    };
-    return icons[status] || <FaBox />;
-  };
-
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          order.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-bold text-secondary-dark">
-          Orders
-        </h2>
-        <p className="text-secondary-dark/60">Manage customer orders</p>
-      </div>
-
-      {/* Search and Filter */}
-      <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[200px] relative">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-dark/40" />
-          <input
-            type="text"
-            placeholder="Search orders..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-field pl-10"
-          />
-        </div>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="select-field w-40"
-        >
-          <option value="all">All Status</option>
-          <option value="processing">Processing</option>
-          <option value="shipped">Shipped</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
-
-      {/* Orders List */}
-      {filteredOrders.length === 0 ? (
-        <div className="glass-morphism rounded-3xl p-12 text-center">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-2xl font-display text-secondary-dark mb-2">
-            No Orders Found
-          </h3>
-          <p className="text-secondary-dark/60">
-            {searchTerm ? 'No orders match your search' : 'No orders have been placed yet'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredOrders.map((order, index) => (
-            <motion.div
-              key={order.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="card-premium p-6"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-secondary-dark">{order.id}</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(order.status)}`}>
-                      {getStatusIcon(order.status)}
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </span>
-                  </div>
-                  <h4 className="font-semibold text-secondary-dark mt-1">
-                    {order.customer}
-                  </h4>
-                  <p className="text-sm text-secondary-dark/60">{order.email}</p>
-                  <p className="text-sm text-secondary-dark/60">{order.address}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-primary-rosePink">
-                    ₹{order.total.toFixed(2)}
-                  </p>
-                  <p className="text-sm text-secondary-dark/60">
-                    {order.items} items
-                  </p>
-                  <p className="text-xs text-secondary-dark/40">
-                    {new Date(order.date).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default Orders;

@@ -2,8 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import Hero from '../components/home/Hero';
-import FeaturedProducts from '../components/home/FeaturedProducts';
-import TrendingProducts from '../components/home/TrendingProducts';
 import LatestProducts from '../components/home/LatestProducts';
 import VideoFeed from '../components/home/VideoFeed';
 import CustomerReviews from '../components/home/CustomerReviews';
@@ -30,8 +28,6 @@ const HomePage = () => {
         className="overflow-hidden"
       >
         <Hero />
-        <FeaturedProducts />
-        <TrendingProducts />
         <LatestProducts />
         <VideoFeed />
         <Categories />

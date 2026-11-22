@@ -23,6 +23,9 @@ const Products = () => {
     price: '',
     discount: '0',
     stock: '',
+    fulfillmentType: 'READY_TO_SHIP',
+    lowStockThreshold: '3',
+    preparationTime: '',
     sku: '',
     material: '',
     weight: '',
@@ -77,6 +80,9 @@ const Products = () => {
         price: product.price || '',
         discount: product.discount || '0',
         stock: product.stock || '',
+        fulfillmentType: product.fulfillmentType || 'READY_TO_SHIP',
+        lowStockThreshold: String(product.lowStockThreshold ?? 3),
+        preparationTime: product.preparationTime || '',
         sku: product.sku || '',
         material: product.material || '',
         weight: product.weight || '',
@@ -104,6 +110,9 @@ const Products = () => {
         price: '',
         discount: '0',
         stock: '',
+        fulfillmentType: 'READY_TO_SHIP',
+        lowStockThreshold: '3',
+        preparationTime: '',
         sku: '',
         material: '',
         weight: '',
@@ -210,7 +219,7 @@ const Products = () => {
     toast.error('Please enter a valid price');
     return;
   }
-  if (!formData.stock || parseInt(formData.stock) < 0) {
+  if (formData.stock === '' || parseInt(formData.stock) < 0) {
     toast.error('Please enter a valid stock quantity');
     return;
   }
@@ -239,6 +248,9 @@ const Products = () => {
     submitData.append('price', formData.price.toString());
     submitData.append('discount', (formData.discount || '0').toString());
     submitData.append('stock', formData.stock.toString());
+    submitData.append('fulfillmentType', formData.fulfillmentType);
+    submitData.append('lowStockThreshold', formData.lowStockThreshold || '3');
+    submitData.append('preparationTime', formData.preparationTime || '');
     submitData.append('sku', formData.sku.trim());
     submitData.append('material', formData.material.trim());
     submitData.append('weight', formData.weight.toString());
@@ -509,6 +521,21 @@ const Products = () => {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <label className="block text-sm font-medium text-secondary-dark">Fulfillment type
+                    <select value={formData.fulfillmentType} onChange={e => setFormData({ ...formData, fulfillmentType: e.target.value })} className="select-field mt-2">
+                      <option value="READY_TO_SHIP">Ready to ship (tracks stock)</option>
+                      <option value="MADE_TO_ORDER">Made to order</option>
+                    </select>
+                  </label>
+                  <label className="block text-sm font-medium text-secondary-dark">Low stock warning threshold
+                    <input type="number" min="0" value={formData.lowStockThreshold} onChange={e => setFormData({ ...formData, lowStockThreshold: e.target.value })} className="input-field mt-2" />
+                  </label>
+                  <label className="block text-sm font-medium text-secondary-dark">Preparation time
+                    <input type="text" maxLength="100" placeholder="e.g. 5-7 days" value={formData.preparationTime} onChange={e => setFormData({ ...formData, preparationTime: e.target.value })} className="input-field mt-2" />
+                  </label>
                 </div>
 
                 {/* SKU & Material */}
